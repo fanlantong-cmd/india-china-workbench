@@ -142,10 +142,33 @@
   .dict-actions{display:flex;gap:8px;padding:10px 12px 0}
   .da-ghost{flex:1;border:1px solid var(--line);background:var(--panel);color:var(--ink-2);border-radius:10px;padding:9px;font-size:13px}
   .da-primary{flex:1;border:0;background:var(--lav);color:#fff;border-radius:10px;padding:9px;font-size:13px;font-weight:600}
-  .dict-notes{max-height:30vh;overflow-y:auto;padding:4px 14px 10px}
+  .dict-notes{max-height:32vh;overflow-y:auto;padding:4px 14px 10px}
   .dict-note{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:12.5px;margin-top:8px;line-height:1.55;word-break:break-word}
-  .dict-note .nt{font-size:10px;color:var(--muted);margin-top:5px}
+  .dict-note .nt{font-size:10px;color:var(--muted);margin-top:5px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .dict-note .nt .cat-tag{font-size:10px;padding:1px 7px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-weight:600;white-space:nowrap}
+  .dict-note .nt .acts{display:flex;gap:4px}
+  .dict-note .nt .acts button{border:1px solid var(--line);background:var(--panel);color:var(--ink-2);width:22px;height:20px;border-radius:6px;font-size:12px;line-height:1;padding:0}
+  .dict-note .nt .acts button:hover{border-color:var(--lav);color:var(--lav)}
   .dict-foot{padding:9px 14px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);line-height:1.5}
+
+  /* —— 语音录入自动归类到各板块 —— */
+  .voice-box{margin-bottom:4px}
+  .voice-box:empty{display:none}
+  .voice-inbox:empty{display:none}
+  .vitem{background:var(--lav-soft);border:1px solid #ddd3ee;border-radius:12px;padding:9px 11px;margin-top:8px;line-height:1.5}
+  .vitem .vtxt{font-size:13px;color:var(--ink);word-break:break-word}
+  .vitem .vmeta{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:6px}
+  .vitem .vtime{font-size:10px;color:var(--muted)}
+  .vitem .vact{display:flex;gap:4px}
+  .vitem .vact button{border:1px solid #ddd3ee;background:#fff;color:#5b4f7a;width:24px;height:22px;border-radius:6px;font-size:12px;line-height:1;padding:0}
+  .vitem .vact button:hover{background:var(--lav);color:#fff;border-color:var(--lav)}
+  .voice-inbox .vitem{background:var(--accent-soft);border-color:#d6dfcc}
+  .voice-inbox .vitem .vact button{border-color:#d6dfcc;color:var(--accent)}
+  .voice-inbox .vact button:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+  /* —— 轻提示 toast —— */
+  .toast{position:fixed;left:50%;bottom:86px;transform:translateX(-50%) translateY(10px);background:var(--ink);color:#fff;padding:9px 16px;border-radius:999px;font-size:12.5px;z-index:80;opacity:0;pointer-events:none;transition:.25s;box-shadow:0 8px 22px rgba(0,0,0,.2)}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
   .panel{display:none}
   .panel.show{display:block;animation:fade .18s ease}
@@ -238,10 +261,12 @@
       <div class="meta"><span class="zh-text">周一自动生成</span><span class="en-text">auto Mon</span><span class="hi-text">सोमवार ऑटो</span></div>
     </div>
   </div>
+  <div class="voice-inbox" id="voiceBox-inbox"></div>
 </section>
 
 <!-- ——— 提醒 ——— -->
 <section class="panel" data-panel="reminders">
+  <div class="voice-box" id="voiceBox-reminders"></div>
   <div class="sec-title">🌅 <span class="zh-text">上午</span><span class="en-text">Morning</span><span class="hi-text">सुबह</span></div>
   <div class="tgroup">
     <div class="titem">
@@ -329,6 +354,7 @@
 
 <!-- ——— 项目（对接的各位客户） ——— -->
 <section class="panel" data-panel="projects">
+  <div class="voice-box" id="voiceBox-projects"></div>
   <div class="sec-title">📁 <span class="zh-text">进行中</span><span class="en-text">In progress</span><span class="hi-text">चालू</span></div>
   <div class="tgroup">
     <div class="titem">
@@ -352,6 +378,7 @@
 
 <!-- ——— 知识库 / skill ——— -->
 <section class="panel" data-panel="kb">
+  <div class="voice-box" id="voiceBox-kb"></div>
   <div class="kb-toggle" onclick="this.nextElementSibling.classList.toggle('open');this.querySelector('.arr').textContent=this.nextElementSibling.classList.contains('open')?'▴':'▾';">ℹ️ <span class="zh-text">怎么用</span><span class="en-text">How it works</span><span class="hi-text">कैसे</span> <span class="arr">▾</span></div>
   <div class="kbnote">
     <b><span class="zh-text">知识库怎么用：</span><span class="en-text">How KB works: </span><span class="hi-text">KB कैसे: </span></b>
@@ -371,6 +398,7 @@
 
 <!-- ——— 记账 ——— -->
 <section class="panel" data-panel="finance">
+  <div class="voice-box" id="voiceBox-finance"></div>
   <div class="hero alt">
     <div class="day"><span class="zh-text">本月财务</span><span class="en-text">This month</span><span class="hi-text">इस माह</span></div>
     <h1>¥ 12.2 <span style="opacity:.7">万</span></h1>
@@ -385,6 +413,7 @@
 
 <!-- ——— 复盘 ——— -->
 <section class="panel" data-panel="review">
+  <div class="voice-box" id="voiceBox-review"></div>
   <div class="hero lav">
     <div class="day"><span class="zh-text">复盘</span><span class="en-text">Reviews</span><span class="hi-text">समीक्षा</span></div>
     <h1><span class="zh-text">周 / 月 / 年</span><span class="en-text">W / M / Y</span><span class="hi-text">स / म / व</span></h1>
@@ -418,7 +447,7 @@
     <button class="da-primary" onclick="saveDict()"><span class="zh-text">保存笔记</span><span class="en-text">Save</span><span class="hi-text">सहेजें</span></span></button>
   </div>
   <div class="dict-notes" id="dictNotes"></div>
-  <div class="dict-foot"><span class="zh-text">讲完可改文字再保存 · AI 会纠错并归档</span><span class="en-text">Edit then save · AI corrects & files</span><span class="hi-text">बदलें फिर सहेजें · AI ठीक</span></span></div>
+  <div class="dict-foot"><span class="zh-text">讲完可改文字再保存 · AI 按关键词自动归入对应板块（提醒/项目/知识库/记账/复盘）</span><span class="en-text">Edit then save · AI auto-files by keyword (reminders/projects/KB/money/review)</span><span class="hi-text">बदलें फ़िर सहेजें · AI ख़ुद वर्गीकृत करता है</span></span></div>
 </div>
 
 <script>
@@ -504,32 +533,124 @@
   function clearDict(){
     finalTranscript='';
     document.getElementById('dictInput').value='';
+    editingId=null;
   }
+  // —— 语音笔记：保存 / 编辑 / 删除 / 智能归类到板块 ——
+  let editingId=null;
+  function uid(){return 'n'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+
+  // 关键词智能归类（纯前端启发式；真正的 AI 语义分类需后端接入 LLM）
+  const CATS={
+    reminders:['提醒','待办','记得','别忘了','明天','今天','几点','安排','计划','回访','跟进','物流','签收','确认','预约','会议','截止','到期','发','买','做','去','याद','कल','आज','मीटिंग',
+      'remind','todo','remember','tomorrow','today','schedule','follow','meeting','deadline','appointment','buy','send','call'],
+    projects:['客户','报价','样品','寄样','谈价','订单','采购','印度','中国','批发','银饰','手链','手机壳','合同','发票','发货','工厂','供应商','项目','对接','raj','delhi','王姐',
+      'client','customer','quote','quotation','sample','order','purchase','supplier','factory','invoice','contract','ship','shipping','deal','project','india','china','mumbai','ग्राहक','ऑर्डर','भाव','सैंपल','भारत'],
+    kb:['书','知识','培训','学','笔记','说明书','视频','怎么用','读','看','课程','资料','学到','整理','收藏','किताब','सीख','नोट','वीडियो','ट्रेनिंग',
+      'book','learn','learning','course','training','manual','note','study','read','watched','video','knowledge'],
+    finance:['钱','收入','支出','账','付款','收到','费用','赚','花','成本','利润','收款','货款','定金','尾款','工资','报销','卢比','人民币','美元','汇率','पैसा','रुपया','आय','खर्च','भुगतान',
+      'money','income','cost','expense','paid','pay','received','payment','profit','salary','invoice','rupee','rmb','usd','rate','fee'],
+    review:['复盘','总结','反思','周报','月报','年报','本周','本月','今年','做得好','改进','经验','समीक्षा','सारांश','साप्ताहिक','मासिक',
+      'review','weekly','monthly','yearly','summary','reflect','retrospective']
+  };
+  const CAT_NAME={reminders:'提醒',projects:'项目',kb:'知识库',finance:'记账',review:'复盘',inbox:'速记'};
+  const CAT_ORDER=['reminders','projects','finance','kb','review'];
+  function categorize(text){
+    const s=' '+(text||'').toLowerCase()+' ';
+    let best='inbox',bestN=0;
+    CAT_ORDER.forEach(cat=>{
+      let n=0;
+      (CATS[cat]||[]).forEach(k=>{ if(s.includes(k.toLowerCase())) n++; });
+      if(n>bestN){bestN=n;best=cat;}
+    });
+    return best;
+  }
+  function loadNotes(){
+    let notes=[];
+    try{notes=JSON.parse(localStorage.getItem('wb_notes')||'[]');}catch(_){notes=[];}
+    let changed=false;
+    notes=notes.map(n=>{
+      n=n||{};
+      if(!n.id){n.id=uid();changed=true;}
+      if(!n.cat){n.cat=categorize(n.text||'');changed=true;}
+      return n;
+    });
+    if(changed){try{localStorage.setItem('wb_notes',JSON.stringify(notes));}catch(_){}}
+    return notes;
+  }
+  function saveNotes(notes){try{localStorage.setItem('wb_notes',JSON.stringify(notes.slice(0,50)));}catch(_){}}
   function saveDict(){
     const ta=document.getElementById('dictInput');
     const text=ta.value.trim();
-    if(!text){ return; }
-    let notes=[];
-    try{notes=JSON.parse(localStorage.getItem('wb_notes')||'[]');}catch(_){}
-    notes.unshift({t:new Date().toLocaleString(),text:text});
-    try{localStorage.setItem('wb_notes',JSON.stringify(notes.slice(0,50)));}catch(_){}
+    if(!text){toast('文字为空');return;}
+    let notes=loadNotes(),savedCat;
+    if(editingId){
+      const i=notes.findIndex(n=>n.id===editingId);
+      if(i>=0){notes[i].text=text;notes[i].cat=categorize(text);notes[i].t=new Date().toLocaleString();savedCat=notes[i].cat;}
+      editingId=null;
+    }else{
+      const note={id:uid(),t:new Date().toLocaleString(),text:text,cat:categorize(text)};
+      notes.unshift(note); savedCat=note.cat;
+    }
+    saveNotes(notes);
     finalTranscript=''; ta.value='';
     document.getElementById('dictate').classList.remove('open');
     document.getElementById('micBtn').classList.remove('recording');
-    renderNotes();
+    renderNotes(); renderVoice();
+    toast('已保存 · 归入「'+CAT_NAME[savedCat]+'」');
+  }
+  function editNote(id){
+    const n=loadNotes().find(x=>x.id===id); if(!n) return;
+    editingId=id;
+    const ta=document.getElementById('dictInput');
+    ta.value=n.text;
+    document.getElementById('dictate').classList.add('open');
+    document.getElementById('micBtn').classList.add('recording');
+    document.getElementById('dictState').innerHTML='<span class="dot"></span> <span class="zh-text">修改中…保存即更新</span><span class="en-text">Editing… save to update</span><span class="hi-text">बदल रहे… सहेजें</span>';
+    ta.focus();
+  }
+  function delNote(id){
+    let notes=loadNotes().filter(n=>n.id!==id);
+    saveNotes(notes);
+    if(editingId===id){editingId=null;document.getElementById('dictInput').value='';document.getElementById('dictate').classList.remove('open');document.getElementById('micBtn').classList.remove('recording');}
+    renderNotes(); renderVoice();
+    toast('已删除');
   }
   function renderNotes(){
     const box=document.getElementById('dictNotes');
-    let notes=[];
-    try{notes=JSON.parse(localStorage.getItem('wb_notes')||'[]');}catch(_){}
+    const notes=loadNotes();
     if(!notes.length){box.innerHTML='<div style="font-size:12px;color:var(--muted);padding:6px 0">—</div>';return;}
-    box.innerHTML=notes.map(n=>'<div class="dict-note">'+esc(n.text)+'<div class="nt">'+esc(n.t)+'</div></div>').join('');
+    box.innerHTML=notes.map(n=>'<div class="dict-note">'+esc(n.text)
+      +'<div class="nt"><span class="cat-tag">'+CAT_NAME[n.cat]+'</span>'
+      +'<span class="acts"><button onclick="editNote(\''+n.id+'\')" title="编辑">✎</button><button onclick="delNote(\''+n.id+'\')" title="删除">×</button></span></div>'
+      +'<div class="nt" style="margin-top:2px">'+esc(n.t)+'</div></div>').join('');
+  }
+  function voiceItemHTML(n){
+    return '<div class="vitem"><div class="vtxt">'+esc(n.text)+'</div>'
+      +'<div class="vmeta"><span class="vtime">'+esc(n.t)+'</span>'
+      +'<span class="vact"><button onclick="editNote(\''+n.id+'\')" title="编辑">✎</button><button onclick="delNote(\''+n.id+'\')" title="删除">×</button></span></div></div>';
+  }
+  function renderVoice(){
+    const notes=loadNotes();
+    ['reminders','projects','kb','finance','review','inbox'].forEach(cat=>{
+      const box=document.getElementById('voiceBox-'+cat); if(!box) return;
+      const items=notes.filter(n=>n.cat===cat);
+      if(!items.length){box.innerHTML='';return;}
+      const head='<div class="sec-title">🎙 <span class="zh-text">语音添加</span><span class="en-text">From voice</span><span class="hi-text">वॉयस से</span></div>';
+      box.innerHTML=head+items.map(voiceItemHTML).join('');
+    });
+  }
+  let toastTimer=null;
+  function toast(msg){
+    let el=document.getElementById('toast');
+    if(!el){el=document.createElement('div');el.id='toast';el.className='toast';document.body.appendChild(el);}
+    el.textContent=msg; el.classList.add('show');
+    clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove('show'),1800);
   }
   function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
   (function initDict(){
     selectedLang=recLang();
     document.querySelectorAll('.dict-lang button').forEach(b=>b.classList.toggle('on',b.getAttribute('data-l')===selectedLang));
-    renderNotes();
+    renderNotes(); renderVoice();
   })();
 
   // —— 爆款实时抓取（自动菜单） ——
