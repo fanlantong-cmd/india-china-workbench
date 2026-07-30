@@ -433,7 +433,7 @@
 <div class="dictate" id="dictate">
   <div class="dictate-head">
     <span id="dictState"><span class="dot"></span> <span class="zh-text">点 🎙 开始讲述</span><span class="en-text">Tap 🎙 to speak</span><span class="hi-text">🎙 दबाएं बोलने</span></span>
-    <button class="dict-close" onclick="toggleDictate()">✕</button>
+    <button class="dict-close" onclick="closeDictate()" title="关闭 Close">✕</button>
   </div>
   <div class="dict-lang">
     <button data-l="zh-CN" onclick="setDictLang(this,'zh-CN')">中</button>
@@ -530,6 +530,20 @@
       // 保留文字在文本框，等用户改好再点「保存笔记」
     }
   }
+  function closeDictate(){
+    dictating=false;
+    if(recog) try{recog.stop();}catch(_){}
+    document.getElementById('dictate').classList.remove('open');
+    document.getElementById('micBtn').classList.remove('recording');
+    document.getElementById('dictState').innerHTML='<span class="dot"></span> <span class="zh-text">点 🎙 开始讲述</span><span class="en-text">Tap 🎙 to speak</span><span class="hi-text">🎙 दबाएं बोलने</span>';
+    if(typeof editingId!=='undefined' && editingId){editingId=null;}
+  }
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'){
+      const p=document.getElementById('dictate');
+      if(p && p.classList.contains('open')) closeDictate();
+    }
+  });
   function clearDict(){
     finalTranscript='';
     document.getElementById('dictInput').value='';
