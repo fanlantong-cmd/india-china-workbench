@@ -3,28 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Workbench · 我的工作台 · मेरा कार्यस्थल</title>
+<title>中印跨境贸易工作台 · Workbench · वर्कबेंच</title>
 <style>
   :root{
-    --bg:#f5f4f1;
-    --panel:#ffffff;
-    --panel-2:#fbfaf7;
-    --ink:#232826;
-    --ink-2:#4b524d;
-    --muted:#8a9089;
-    --line:#ecebe5;
-    --accent:#7a8a6f;        /* 柔和橄榄绿 */
-    --accent-soft:#eef0e9;
-    --accent-2:#c98a6b;      /* 暖橘 */
-    --lav:#a89cc8;           /* 紫灰（参考图色） */
-    --lav-soft:#e8e3f0;
-    --pink:#e7a8a8;          /* 粉色（参考图色） */
-    --pink-soft:#f7e4e2;
-    --danger:#c0533a;
+    --bg:#f5f4f1; --panel:#ffffff; --panel-2:#fbfaf7;
+    --ink:#232826; --ink-2:#4b524d; --muted:#8a9089;
+    --line:#ecebe5; --accent:#7a8a6f; --accent-soft:#eef0e9;
+    --accent-2:#c98a6b; --lav:#a89cc8; --lav-soft:#e8e3f0;
+    --pink:#e7a8a8; --danger:#c0533a; --ok:#5b8a5b;
     --shadow:0 1px 2px rgba(20,30,20,.04),0 6px 18px rgba(20,30,20,.05);
-    --radius:18px;
-    --side-w:60px;
-    --head-h:0px;
+    --radius:18px; --side-w:62px; --top-h:56px;
     --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
   }
   *{box-sizing:border-box}
@@ -32,706 +20,1144 @@
   a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}
   ::selection{background:var(--accent-soft);color:var(--ink)}
 
-  /* 三语显示控制 */
-  body.lang-zh .en-text,.body.lang-zh .hi-text{display:none}
-  body.lang-en .zh-text,.body.lang-en .hi-text{display:none}
-  body.lang-hi .zh-text,.body.lang-hi .en-text{display:none}
-  body.lang-both .hi-text::before{content:" · "}
-  body.lang-both .zh-text{font-weight:600}
+  /* —— 单语种显示：只显示当前语种，禁止三语同屏 —— */
+  body.lang-zh .en-text,body.lang-zh .hi-text{display:none}
+  body.lang-en .zh-text,body.lang-en .hi-text{display:none}
+  body.lang-hi .zh-text,body.lang-hi .en-text{display:none}
 
-  /* —— 顶部小地球（语言切换，取代原顶栏） —— */
-  .langfab{position:fixed;top:10px;right:12px;z-index:50;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--panel);font-size:15px;color:var(--ink-2);display:grid;place-items:center;box-shadow:var(--shadow)}
+  /* —— 顶部：全局搜索 + 语言切换 —— */
+  .topbar{position:fixed;top:0;left:0;right:0;height:var(--top-h);background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;padding:0 14px 0 calc(var(--side-w) + 12px);z-index:50}
+  .brand{font-weight:700;font-size:14px;white-space:nowrap;color:var(--ink)}
+  .brand .sub{font-weight:500;color:var(--muted);font-size:11px;margin-left:6px}
+  .search{position:relative;flex:1;max-width:680px}
+  .search input{width:100%;height:38px;border:1px solid var(--line);border-radius:999px;padding:0 40px 0 38px;font-size:13.5px;background:var(--panel-2);outline:none}
+  .search input:focus{border-color:var(--accent);background:#fff}
+  .search .si{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px}
+  .search .sc{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:var(--accent);color:#fff;border-radius:999px;height:26px;padding:0 12px;font-size:12px;display:none}
+  .search.has-q .sc{display:block}
+  .langfab{min-width:38px;height:38px;border-radius:19px;border:1px solid var(--line);background:var(--panel);font-size:14px;color:var(--ink-2);display:inline-flex;align-items:center;justify-content:center;gap:2px;flex:none;padding:0 9px}
+  .langfab #langCode{font-size:12px;font-weight:700}
+  .topmic{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--panel);font-size:16px;color:var(--ink-2);display:grid;place-items:center;flex:none}
+  .topmic:hover{color:var(--accent);border-color:var(--accent)}
   .langfab:hover{color:var(--accent);border-color:var(--accent)}
+  /* 搜索结果下拉 */
+  .sres{position:absolute;top:46px;left:calc(var(--side-w) + 12px);right:14px;max-width:700px;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);max-height:64vh;overflow:auto;z-index:60;display:none}
+  .sres.show{display:block}
+  .sres .grp{font-size:11px;color:var(--muted);padding:8px 14px 4px;font-weight:600;letter-spacing:.3px}
+  .sitem{padding:10px 14px;border-top:1px solid var(--line);cursor:pointer}
+  .sitem:hover{background:var(--accent-soft)}
+  .sitem .st{font-size:13.5px;font-weight:600}
+  .sitem .sp{font-size:11px;color:var(--accent);margin-right:8px;font-weight:600}
+  .sitem .sb{font-size:12px;color:var(--ink-2);margin-top:3px;line-height:1.5}
+  .sitem .sb mark{background:#fff2b8;color:var(--ink);padding:0 1px;border-radius:2px}
+  .sitem .sx{font-size:10.5px;color:var(--muted);margin-top:3px}
+  .sempty{padding:16px 14px;color:var(--muted);font-size:12.5px}
 
-  /* —— 窄侧栏（纯图标） —— */
-  .sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--side-w);background:var(--panel);border-right:1px solid var(--line);padding:10px 4px;overflow-y:auto;z-index:40}
-  .nav{display:flex;flex-direction:column;gap:4px}
-  .nav a{display:flex;align-items:center;justify-content:center;padding:10px 0;border-radius:10px;color:var(--ink-2);transition:.12s;position:relative}
+  /* —— 侧边栏：纯图标，无悬停翻译 —— */
+  .sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--side-w);background:var(--panel);border-right:1px solid var(--line);padding:10px 0;display:flex;flex-direction:column;z-index:55}
+  .nav{display:flex;flex-direction:column;gap:6px;padding:0 8px}
+  .nav a{display:flex;align-items:center;justify-content:center;height:44px;border-radius:12px;color:var(--ink-2);transition:.12s;font-size:22px}
   .nav a:hover{background:var(--panel-2)}
   .nav a.active{background:var(--accent-soft);color:var(--accent)}
-  .nav .ico{font-size:22px;line-height:1}
-  .nav .lbl{display:none}  /* 纯图标，悬停时浮出 tooltip */
-  .nav a:hover::after{content:attr(data-tip);position:absolute;left:calc(100% + 8px);top:50%;transform:translateY(-50%);background:var(--ink);color:#fff;padding:5px 10px;border-radius:6px;font-size:11px;white-space:nowrap;z-index:60;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,.15)}
-  .nav .num{display:none}  /* 不显示编号，更简洁 */
+  .nav .spacer{flex:1}
+  .mic-btn{display:flex;align-items:center;justify-content:center;height:46px;margin:0 8px;border-radius:14px;background:var(--lav);color:#fff;font-size:22px;box-shadow:var(--shadow)}
+  .mic-btn:hover{filter:brightness(1.05)}
+  .mic-btn.recording{animation:pulse 1.2s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(168,156,200,.5)}50%{box-shadow:0 0 0 8px rgba(168,156,200,0)}}
 
   /* —— 主区 —— */
-  main{margin-left:var(--side-w);padding:18px 18px 80px;min-height:100vh}
+  main{margin-left:var(--side-w);padding:calc(var(--top-h) + 16px) 18px 90px;min-height:100vh}
   .page-head{margin-bottom:14px}
-  .page-head h1{margin:0;font-size:18px;font-weight:700}
-  .page-head .sub{color:var(--muted);font-size:12px;margin-top:2px}
-
-  /* —— 大 Hero 卡（参考图风格） —— */
-  .hero{background:linear-gradient(135deg,var(--lav-soft),var(--lav));color:#3a3147;border-radius:var(--radius);padding:22px 24px;margin-bottom:16px;box-shadow:var(--shadow)}
-  .hero .day{font-size:12px;opacity:.7;letter-spacing:1px}
-  .hero h1{margin:4px 0 6px;font-size:24px;font-weight:700}
-  .hero .meta{font-size:12.5px;opacity:.85}
-  .hero.alt{background:linear-gradient(135deg,var(--pink-soft),var(--pink));color:#6e3a3a}
-  .hero.lav{background:linear-gradient(135deg,var(--lav-soft),var(--lav));color:#3a3147}
-
-  /* —— 2 列网格卡片 —— */
-  .grid{display:grid;gap:12px}
-  .grid.c2{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .grid.c3{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .grid.c4{grid-template-columns:repeat(4,minmax(0,1fr))}
-  @media(max-width:900px){.grid.c3,.grid.c4{grid-template-columns:repeat(2,minmax(0,1fr))}}
-  @media(max-width:560px){.grid.c2,.grid.c3,.grid.c4{grid-template-columns:1fr}}
-
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px;min-height:110px;transition:.15s}
-  .card:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(20,30,20,.08)}
-  .card .bigico{font-size:32px;line-height:1}
-  .card .lbl{font-size:12px;color:var(--muted);font-weight:500}
-  .card .val{font-size:22px;font-weight:700;color:var(--ink);line-height:1.2}
-  .card .meta{font-size:12px;color:var(--ink-2)}
-  .card .meta.link{color:var(--accent)}
-
-  /* —— 顶部 section 标题（参考图"重要倒计时""每日题量追踪"） —— */
-  .sec-title{font-size:16px;font-weight:700;margin:18px 0 10px;color:var(--ink)}
-
-  /* —— 时间分组列表（上午/下午/晚上） —— */
-  .tgroup{margin-bottom:14px}
-  .tgroup .head{display:flex;align-items:center;gap:6px;color:var(--accent-2);font-weight:600;margin-bottom:6px}
-  .tgroup .head .ic{font-size:18px}
-  .titem{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:8px}
-  .titem .chk{width:22px;height:22px;border:1.5px solid var(--line);border-radius:50%;flex-shrink:0;display:grid;place-items:center;color:#fff}
-  .titem .chk.done{background:var(--accent);border-color:var(--accent)}
-  .titem .body{flex:1;min-width:0}
-  .titem .ti{font-size:13.5px;font-weight:600;line-height:1.4}
-  .titem .me{font-size:11.5px;color:var(--muted);line-height:1.4;margin-top:2px}
-  .titem .time{font-variant-numeric:tabular-nums;font-size:12px;color:var(--muted);margin-left:auto}
-
-  /* —— 爆款抓取（自动菜单） —— */
-  .trend-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
-  .trend-tabs button{border:1px solid var(--line);background:var(--panel);color:var(--ink-2);border-radius:999px;padding:4px 11px;font-size:11.5px}
-  .trend-tabs button.on{background:var(--lav);color:#fff;border-color:var(--lav)}
-  .trend-refresh{margin-left:8px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:3px 9px;font-size:12px;color:var(--ink-2);cursor:pointer;vertical-align:middle}
-  .trend-refresh:hover{color:var(--accent);border-color:var(--accent)}
-  .trend-list{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
-  .trend-item{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:5px}
-  .trend-item .trow{display:flex;align-items:flex-start;gap:8px}
-  .trend-item .ptag{font-size:10.5px;font-weight:700;color:#fff;background:var(--accent);padding:3px 8px;border-radius:6px;white-space:nowrap;flex-shrink:0;line-height:1.3}
-  .trend-item .ptag.douyin{background:#111}
-  .trend-item .ptag.bili{background:#00aeec}
-  .trend-item .ptag.weibo{background:#df2020}
-  .trend-item .ptag.ig{background:linear-gradient(45deg,#f09433,#dc2743)}
-  .trend-item .ptag.x{background:#000}
-  .trend-item .title{font-size:13.5px;font-weight:600;color:var(--ink);line-height:1.45;flex:1}
-  .trend-item .meta{font-size:11.5px;color:var(--muted);padding-left:0}
-  .trend-item .heat{color:var(--accent-2);font-weight:600}
-  .trend-note{font-size:11.5px;color:var(--muted);padding:9px 12px;background:var(--panel-2);border-radius:10px;margin-top:4px;line-height:1.5}
-
-  /* —— 浮动按钮：🎙 讲述录入（语音输入） —— */
-  .fab{position:fixed;right:22px;width:56px;height:56px;color:#fff;border:0;border-radius:50%;font-size:24px;box-shadow:0 10px 24px rgba(20,30,20,.18);display:grid;place-items:center;z-index:55}
-  .fab:hover{filter:brightness(1.05)}
-  .fab-stt{bottom:22px;background:var(--lav)}
-  .fab-stt.recording{background:var(--danger);animation:pulse 1.1s infinite}
-  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(192,83,58,.5)}70%{box-shadow:0 0 0 16px rgba(192,83,58,0)}100%{box-shadow:0 0 0 0 rgba(192,83,58,0)}}
-
-  /* —— 讲述录入面板 —— */
-  .dictate{position:fixed;right:22px;bottom:90px;width:min(360px,calc(100vw - 44px));background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 14px 40px rgba(20,30,20,.2);display:none;flex-direction:column;z-index:60;max-height:64vh;overflow:hidden}
-  .dictate.open{display:flex}
-  .dictate-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--line);font-size:13px;font-weight:600;color:var(--ink-2)}
-  .dictate-head .dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--accent);margin-right:6px;vertical-align:middle}
-  .dictate-head .dot.rec{background:var(--danger);animation:pulse 1.1s infinite}
-  .dict-close{border:0;background:transparent;font-size:16px;color:var(--muted);line-height:1}
-  .dict-lang{display:flex;align-items:center;gap:6px;padding:8px 12px 0}
-  .dict-lang button{border:1px solid var(--line);background:var(--panel);color:var(--ink-2);border-radius:8px;padding:4px 11px;font-size:12px;line-height:1.4}
-  .dict-lang button.on{background:var(--lav);color:#fff;border-color:var(--lav)}
-  .dict-lang .dl-hint{font-size:10.5px;color:var(--muted);margin-left:auto;max-width:118px;text-align:right;line-height:1.3}
-  .dict-input{margin:8px 12px 0;height:96px;border:1px solid var(--line);border-radius:10px;padding:10px;font-family:var(--font);font-size:14px;color:var(--ink);resize:none;outline:none;line-height:1.5;display:block;width:calc(100% - 24px)}
-  .dict-input:focus{border-color:var(--lav)}
-  .dict-actions{display:flex;gap:8px;padding:10px 12px 0}
-  .da-ghost{flex:1;border:1px solid var(--line);background:var(--panel);color:var(--ink-2);border-radius:10px;padding:9px;font-size:13px}
-  .da-primary{flex:1;border:0;background:var(--lav);color:#fff;border-radius:10px;padding:9px;font-size:13px;font-weight:600}
-  .dict-notes{max-height:32vh;overflow-y:auto;padding:4px 14px 10px}
-  .dict-note{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:12.5px;margin-top:8px;line-height:1.55;word-break:break-word}
-  .dict-note .nt{font-size:10px;color:var(--muted);margin-top:5px;display:flex;justify-content:space-between;align-items:center;gap:8px}
-  .dict-note .nt .cat-tag{font-size:10px;padding:1px 7px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-weight:600;white-space:nowrap}
-  .dict-note .nt .acts{display:flex;gap:4px}
-  .dict-note .nt .acts button{border:1px solid var(--line);background:var(--panel);color:var(--ink-2);width:22px;height:20px;border-radius:6px;font-size:12px;line-height:1;padding:0}
-  .dict-note .nt .acts button:hover{border-color:var(--lav);color:var(--lav)}
-  .dict-foot{padding:9px 14px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);line-height:1.5}
-
-  /* —— 语音录入自动归类到各板块 —— */
-  .voice-box{margin-bottom:4px}
-  .voice-box:empty{display:none}
-  .voice-inbox:empty{display:none}
-  .vitem{background:var(--lav-soft);border:1px solid #ddd3ee;border-radius:12px;padding:9px 11px;margin-top:8px;line-height:1.5}
-  .vitem .vtxt{font-size:13px;color:var(--ink);word-break:break-word}
-  .vitem .vmeta{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:6px}
-  .vitem .vtime{font-size:10px;color:var(--muted)}
-  .vitem .vact{display:flex;gap:4px}
-  .vitem .vact button{border:1px solid #ddd3ee;background:#fff;color:#5b4f7a;width:24px;height:22px;border-radius:6px;font-size:12px;line-height:1;padding:0}
-  .vitem .vact button:hover{background:var(--lav);color:#fff;border-color:var(--lav)}
-  .voice-inbox .vitem{background:var(--accent-soft);border-color:#d6dfcc}
-  .voice-inbox .vitem .vact button{border-color:#d6dfcc;color:var(--accent)}
-  .voice-inbox .vact button:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
-
-  /* —— 轻提示 toast —— */
-  .toast{position:fixed;left:50%;bottom:86px;transform:translateX(-50%) translateY(10px);background:var(--ink);color:#fff;padding:9px 16px;border-radius:999px;font-size:12.5px;z-index:80;opacity:0;pointer-events:none;transition:.25s;box-shadow:0 8px 22px rgba(0,0,0,.2)}
-  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
+  .page-head h1{margin:0;font-size:19px;font-weight:700}
+  .page-head .desc{color:var(--muted);font-size:12.5px;margin-top:3px}
   .panel{display:none}
   .panel.show{display:block;animation:fade .18s ease}
   @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 
-  .voice-hint{background:var(--accent-soft);border:1px solid #d6dfcc;border-radius:12px;padding:10px 12px;font-size:12px;color:var(--ink-2);margin-bottom:14px;display:flex;gap:8px;align-items:flex-start}
-  .voice-hint b{color:var(--accent)}
-
-  .card-link{cursor:pointer}
-
-  /* —— 习惯卡完成态 —— */
+  .grid{display:grid;gap:12px}
+  .grid.c2{grid-template-columns:repeat(2,1fr)}
+  .grid.c3{grid-template-columns:repeat(3,1fr)}
+  .grid.c4{grid-template-columns:repeat(4,1fr)}
+  @media(max-width:760px){.grid.c3,.grid.c4{grid-template-columns:repeat(2,1fr)}.grid.c2{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow)}
+  .card .bigico{font-size:24px}
+  .card .lbl{font-weight:600;font-size:13.5px;margin-top:4px}
+  .card .val{font-size:20px;font-weight:700;margin-top:2px}
+  .card .meta{font-size:11.5px;color:var(--muted);margin-top:4px;line-height:1.45}
   .card.done{border-color:var(--accent);background:var(--accent-soft)}
   .card.done .bigico{filter:saturate(1.3)}
 
-  /* —— 提醒：时长 —— */
-  .titem .time{font-variant-numeric:tabular-nums;font-size:12px;color:var(--muted);margin-left:auto;text-align:center;line-height:1.25}
-  .titem .time .dur{display:block;font-size:10px;opacity:.8;margin-top:1px}
+  .sec-title{font-weight:700;font-size:14px;margin:18px 0 8px;display:flex;align-items:center;gap:6px}
+  .sec-title .tag{font-size:10.5px;color:var(--muted);font-weight:500}
 
-  /* —— 项目状态 pill —— */
-  .pill.st{background:var(--lav-soft);color:#5b4f7a;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600;margin-left:auto;white-space:nowrap}
-  .pill.st.warn{background:#f7e4e2;color:var(--danger)}
+  /* 提醒条目 */
+  .tlist{display:flex;flex-direction:column;gap:8px}
+  .titem{display:flex;align-items:flex-start;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:11px 12px}
+  .titem .chk{width:20px;height:20px;border-radius:6px;border:2px solid var(--line);flex:none;margin-top:1px;cursor:pointer;display:grid;place-items:center;color:#fff;font-size:12px}
+  .titem.done .chk{background:var(--ok);border-color:var(--ok)}
+  .titem.done .ti{text-decoration:line-through;color:var(--muted)}
+  .titem .body{flex:1;min-width:0}
+  .titem .ti{font-weight:600;font-size:13.5px}
+  .titem .me{font-size:12px;color:var(--ink-2);margin-top:2px}
+  .titem .time{font-size:11px;color:var(--muted);text-align:right;white-space:nowrap;flex:none}
+  .titem .time .dur{display:block;margin-top:1px}
+  .titem .src{font-size:10px;color:var(--accent);background:var(--accent-soft);padding:1px 7px;border-radius:999px;margin-left:6px}
+  .titem .acts{display:flex;gap:4px;flex:none}
+  .titem .acts button{border:1px solid var(--line);background:#fff;color:var(--ink-2);width:24px;height:22px;border-radius:6px;font-size:12px;line-height:1;padding:0}
+  .titem .acts button:hover{border-color:var(--lav);color:var(--lav)}
 
-  /* —— 知识库说明（可折叠） —— */
-  .kb-toggle{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:10px;background:var(--panel-2);border:1px solid var(--line);font-size:12.5px;color:var(--ink-2);margin-bottom:10px;cursor:pointer;user-select:none}
-  .kb-toggle:hover{color:var(--accent);border-color:var(--accent)}
-  .kb-toggle .arr{font-size:10px;color:var(--muted)}
-  .kbnote{display:none;background:var(--panel-2);border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:12.5px;color:var(--ink-2);line-height:1.6;margin-bottom:14px}
-  .kbnote.open{display:block}
-  .kbnote b{color:var(--accent)}
-  .kbtip{margin-top:14px;background:var(--lav-soft);border-radius:12px;padding:10px 14px;font-size:12.5px;color:#5b4f7a}
+  /* 项目客户台账 */
+  .client{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:12px 14px;margin-bottom:12px;box-shadow:var(--shadow)}
+  .client .ch{display:flex;align-items:center;gap:10px}
+  .client .ava{width:38px;height:38px;border-radius:50%;background:var(--lav-soft);color:#5b4f7a;display:grid;place-items:center;font-size:18px;flex:none}
+  .client .cn{font-weight:700;font-size:15px}
+  .client .cm{font-size:11.5px;color:var(--muted)}
+  .client .cacts{margin-left:auto;display:flex;gap:6px}
+  .client .cacts button{border:1px solid var(--line);background:#fff;color:var(--ink-2);border-radius:8px;padding:5px 10px;font-size:12px}
+  .client .cacts button:hover{border-color:var(--lav);color:var(--lav)}
+  .client .ch{cursor:pointer}
+  .chev{color:var(--muted);font-size:14px;margin-left:6px;flex:none}
+  .sub{margin-top:6px}
+  .orow{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--panel-2);margin-top:6px;font-size:12.5px;cursor:pointer}
+  .orow:hover{border-color:var(--accent)}
+  .orow .od{color:var(--muted);flex:none;font-size:11.5px}
+  .orow .og{flex:1;font-weight:600}
+  .orow .ot{font-weight:700;color:var(--accent);flex:none}
+  .odsec{margin-bottom:8px}
+  .odsh{font-size:11px;color:var(--muted);font-weight:700;margin:6px 0 2px}
+  .order{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:10px}
+  .order .oh{display:flex;align-items:center;gap:8px;font-weight:600;font-size:13px}
+  .order .oacts{margin-left:auto}
+  .order .oacts button{border:1px solid var(--line);background:#fff;color:var(--accent);font-size:11px;padding:3px 10px;border-radius:8px;font-weight:600}
+  .order .pill{font-size:10.5px;padding:2px 8px;border-radius:999px;background:var(--lav-soft);color:#5b4f7a;font-weight:600}
+  .order .pill.warn{background:#f7e4e2;color:var(--danger)}
+  .order .pill.ok{background:var(--accent-soft);color:var(--ok)}
+  .ogrid{display:grid;grid-template-columns:repeat(2,1fr);gap:4px 14px;margin-top:8px;font-size:12px}
+  .ogrid div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px dashed var(--line);padding:3px 0}
+  .ogrid .k{color:var(--muted)}
+  .ogrid .v{font-weight:600;text-align:right}
+  .follows{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+  .follow{font-size:11px;border:1px solid var(--line);border-radius:999px;padding:4px 10px;display:flex;align-items:center;gap:6px;background:#fff}
+  .follow .dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+  .follow.done{border-color:var(--ok);color:var(--ok)}
+  .follow.done .dot{background:var(--ok)}
+  .follow .fd{color:var(--muted);font-size:10px}
+
+  /* 知识库 */
+  .kbitem{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:12px 14px;margin-bottom:10px;box-shadow:var(--shadow)}
+  .kbitem .kt{font-weight:700;font-size:14px;display:flex;align-items:center;gap:8px}
+  .kbitem .kw{font-size:10.5px;background:var(--accent-soft);color:var(--accent);padding:2px 8px;border-radius:999px;font-weight:600}
+  .kbitem .row{margin-top:8px;font-size:12.5px}
+  .kbitem .row b{color:var(--accent);font-size:11px;display:block;margin-bottom:2px}
+  .kbitem .syn{margin-top:8px;font-size:10.5px;color:var(--muted)}
+  .kbitem .syn span{background:var(--panel-2);border:1px solid var(--line);border-radius:999px;padding:1px 7px;margin:2px 3px 0 0;display:inline-block}
+  .kbitem .kacts{margin-top:8px;display:flex;gap:6px}
+  .kbitem .kacts button{border:1px solid var(--line);background:#fff;color:var(--ink-2);border-radius:8px;padding:4px 9px;font-size:11.5px}
+  .kbitem .kacts button:hover{border-color:var(--lav);color:var(--lav)}
+
+  /* 记账 */
+  .fitem{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+  .fitem .fi{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:17px;flex:none}
+  .fitem.in .fi{background:var(--accent-soft);color:var(--ok)}
+  .fitem.out .fi{background:#f7e4e2;color:var(--danger)}
+  .fitem .fb{flex:1;min-width:0}
+  .fitem .ft{font-weight:600;font-size:13.5px}
+  .fitem .fm{font-size:11px;color:var(--muted)}
+  .fitem .fa{font-weight:700;font-size:15px;white-space:nowrap}
+  .fitem.in .fa{color:var(--ok)} .fitem.out .fa{color:var(--danger)}
+
+  /* 自动化卡片 */
+  .auto-card{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:13px 15px;box-shadow:var(--shadow)}
+  .auto-card .ah{display:flex;align-items:center;gap:9px}
+  .auto-card .num{width:26px;height:26px;border-radius:8px;background:var(--lav);color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px;flex:none}
+  .auto-card .at{font-weight:700;font-size:14px}
+  .auto-card .when{margin-left:auto;font-size:11px;color:#5b4f7a;background:var(--lav-soft);padding:3px 9px;border-radius:999px;font-weight:600}
+  .auto-card .ab{font-size:12px;color:var(--ink-2);margin-top:8px;line-height:1.6}
+  .auto-card .step{margin-top:6px;font-size:12px;color:var(--ink-2);display:flex;gap:7px}
+  .auto-card .step .s{color:var(--accent);font-weight:700}
+
+  /* 打卡 */
+  .check{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .check .ci{font-size:22px}
+  .check .cl{font-weight:600;flex:1}
+  .check .ct{font-size:11px;color:var(--muted)}
+  .check .box{width:26px;height:26px;border-radius:8px;border:2px solid var(--line);display:grid;place-items:center;color:#fff;cursor:pointer;font-size:14px}
+  .check.on .box{background:var(--ok);border-color:var(--ok)}
+
+  /* 趋势 */
+  .trend-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+  .trend-tabs button{border:1px solid var(--line);background:#fff;color:var(--ink-2);border-radius:999px;padding:5px 12px;font-size:12px}
+  .trend-tabs button.on{border-color:var(--lav);background:var(--lav);color:#fff}
+  .trend-list{display:flex;flex-direction:column;gap:7px}
+  .trend-item{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:10px 12px}
+  .trend-item .tr{display:flex;align-items:center;gap:8px}
+  .trend-item .ptag{font-size:10.5px;padding:2px 8px;border-radius:999px;background:var(--lav-soft);color:#5b4f7a;font-weight:600}
+  .trend-item .tt{font-weight:600;font-size:13px}
+  .trend-item .th{font-size:11px;color:var(--danger);margin-left:auto;white-space:nowrap}
+  .trend-note{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .trend-refresh{border:1px solid var(--line);background:#fff;border-radius:8px;width:26px;height:24px;font-size:13px;margin-left:8px}
+  .trend-refresh:hover{border-color:var(--lav);color:var(--lav)}
+
+  /* 弹出录入面板 */
+  .dictate{position:fixed;right:14px;bottom:14px;width:340px;max-width:calc(100vw - 28px);background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:0 12px 40px rgba(20,30,20,.18);z-index:70;display:none;overflow:hidden}
+  .dictate.open{display:block;animation:fade .18s ease}
+  .dictate-head{display:flex;align-items:center;gap:8px;padding:11px 13px;border-bottom:1px solid var(--line)}
+  .dictate-head #dictState{font-size:12.5px;flex:1}
+  .dictate-head .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--muted);margin-right:4px}
+  .dictate-head .dot.rec{background:var(--danger);animation:pulse 1.2s infinite}
+  .dict-close{border:0;background:transparent;font-size:17px;color:var(--muted)}
+  .dict-lang{display:flex;gap:6px;padding:9px 12px 0;align-items:center}
+  .dict-lang button{border:1px solid var(--line);background:#fff;color:var(--ink-2);border-radius:8px;padding:5px 10px;font-size:12px}
+  .dict-lang button.on{border-color:var(--lav);background:var(--lav);color:#fff}
+  .dict-lang .dl-hint{font-size:10.5px;color:var(--muted);margin-left:auto;max-width:150px;text-align:right}
+  .dict-input{margin:8px 12px 0;height:110px;border:1px solid var(--line);border-radius:10px;padding:10px;font-family:var(--font);font-size:14px;color:var(--ink);resize:none;outline:none;width:calc(100% - 24px)}
+  .dict-input:focus{border-color:var(--lav)}
+  .dict-actions{display:flex;gap:8px;padding:10px 12px 0}
+  .da-ghost{flex:1;border:1px solid var(--line);background:var(--panel);color:var(--ink-2);border-radius:10px;padding:9px;font-size:13px}
+  .da-primary{flex:1;border:0;background:var(--lav);color:#fff;border-radius:10px;padding:9px;font-size:13px;font-weight:600}
+  .dict-foot{padding:9px 13px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);line-height:1.5;margin-top:8px}
+  .dict-cat{display:flex;gap:6px;padding:0 12px}
+  .dict-cat select{flex:1;border:1px solid var(--line);border-radius:8px;padding:7px;font-size:12.5px;color:var(--ink);background:#fff}
+
+  /* 通用按钮 / 表单 */
+  .btn{border:1px solid var(--line);background:#fff;color:var(--ink-2);border-radius:10px;padding:9px 14px;font-size:13px;font-weight:600}
+  .btn:hover{border-color:var(--lav);color:var(--lav)}
+  .btn.pri{background:var(--lav);color:#fff;border-color:var(--lav)}
+  .btn.accent{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .row-actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;align-items:center}
+  .voice-hint{font-size:11.5px;color:var(--muted)}
+  .hint{font-size:11.5px;color:var(--muted);line-height:1.6;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .modal{position:fixed;inset:0;background:rgba(20,30,20,.45);z-index:90;display:none;align-items:center;justify-content:center;padding:18px}
+  .modal.show{display:flex}
+  .modal .box{background:#fff;border-radius:16px;width:100%;max-width:460px;max-height:86vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+  .modal .mh{padding:14px 16px;border-bottom:1px solid var(--line);font-weight:700;font-size:15px;display:flex;align-items:center}
+  .modal .mh .x{margin-left:auto;border:0;background:transparent;font-size:18px;color:var(--muted)}
+  .modal .mb{padding:14px 16px}
+  .field{margin-bottom:11px}
+  .field label{display:block;font-size:12px;color:var(--ink-2);margin-bottom:4px;font-weight:600}
+  .field input,.field textarea,.field select{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px 10px;font-size:13px;font-family:var(--font);outline:none;background:#fff;color:var(--ink)}
+  .field input:focus,.field textarea:focus{border-color:var(--lav)}
+  .field textarea{height:74px;resize:vertical}
+
+  /* 轻提示 */
+  .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(10px);background:var(--ink);color:#fff;padding:10px 16px;border-radius:999px;font-size:12.5px;z-index:95;opacity:0;pointer-events:none;transition:.25s;box-shadow:0 8px 22px rgba(0,0,0,.2);max-width:90vw;text-align:center}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  /* 到期弹窗 */
+  .due-card{background:var(--lav-soft);border:1px solid #ddd3ee;border-radius:12px;padding:11px 13px;margin-bottom:10px}
+  .due-card .dt{font-weight:700;font-size:13.5px}
+  .due-card .dm{font-size:12px;color:var(--ink-2);margin-top:3px}
+  .empty{color:var(--muted);font-size:12.5px;padding:14px 2px}
+  .voice-note{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:12.5px;margin-top:8px;line-height:1.5}
+  .voice-note .vm{font-size:10px;color:var(--muted);margin-top:5px;display:flex;justify-content:space-between}
+  .voice-note .vm .acts{display:flex;gap:4px}
+  .voice-note .vm .acts button{border:1px solid var(--line);background:#fff;color:var(--ink-2);width:22px;height:20px;border-radius:6px;font-size:12px;padding:0}
+  .cat-tag{font-size:10px;padding:1px 7px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-weight:600}
 </style>
 </head>
-<body class="lang-both">
+<body class="lang-zh">
 
-<!-- 顶部小地球（语言切换） -->
-<button class="langfab" onclick="cycleLang()" id="langBtn" title="切换语言">🌐</button>
+<!-- —— 顶部：全局搜索 + 语言切换 —— -->
+<div class="topbar">
+  <div class="search" id="searchWrap">
+    <span class="si">🔍</span>
+    <input id="searchInput" placeholder="全局搜索：客户 / 订单 / 知识库 / 记账 / 复盘 / 热点…" oninput="onSearch()" onkeydown="if(event.key==='Enter')runSearch()">
+    <button class="sc" id="searchClear" onclick="clearSearch()">✕</button>
+  </div>
+  <button class="topmic" onclick="toggleDictate()" title="语音录入 / Dictate / बोलें">🎙</button>
+  <button class="langfab" onclick="cycleLang()" id="langBtn" title="切换语言 / Switch / भाषा">🌐<span id="langCode">中</span></button>
+</div>
 
-<!-- 窄侧栏：纯图标 + hover tooltip -->
-<aside class="sidebar">
-  <nav class="nav" id="nav">
-    <a data-target="overview" class="active" data-tip="首页 Home होम"><span class="ico">🏠</span><span class="lbl"><span class="zh-text">首页</span><span class="en-text">Home</span><span class="hi-text">होम</span></span></a>
-    <a data-target="reminders" data-tip="提醒 Reminders रिमाइंडर"><span class="ico">⏰</span><span class="lbl"><span class="zh-text">提醒</span><span class="en-text">Reminders</span><span class="hi-text">रिमाइंडर</span></span></a>
-    <a data-target="auto" data-tip="自动 Daily डेली"><span class="ico">🔄</span><span class="lbl"><span class="zh-text">自动</span><span class="en-text">Daily</span><span class="hi-text">डेली</span></span></a>
-    <a data-target="projects" data-tip="项目 Projects प्रोजेक्ट"><span class="ico">📁</span><span class="lbl"><span class="zh-text">项目</span><span class="en-text">Projects</span><span class="hi-text">प्रोजेक्ट</span></span></a>
-    <a data-target="kb" data-tip="知识库 Knowledge ज्ञान"><span class="ico">📚</span><span class="lbl"><span class="zh-text">知识库</span><span class="en-text">Knowledge</span><span class="hi-text">ज्ञान</span></span></a>
-    <a data-target="finance" data-tip="记账 Money पैसा"><span class="ico">💰</span><span class="lbl"><span class="zh-text">记账</span><span class="en-text">Money</span><span class="hi-text">पैसा</span></span></a>
-    <a data-target="review" data-tip="复盘 Review समीक्षा"><span class="ico">📊</span><span class="lbl"><span class="zh-text">复盘</span><span class="en-text">Review</span><span class="hi-text">समीक्षा</span></span></a>
-  </nav>
-</aside>
+<!-- 搜索结果下拉 -->
+<div class="sres" id="sres"></div>
 
+<!-- —— 侧边栏：纯图标 + 底部麦克风 —— -->
+<div class="sidebar">
+  <div class="nav">
+    <a data-target="overview" class="active" onclick="goTo('overview')">🏠</a>
+    <a data-target="reminders" onclick="goTo('reminders')">⏰</a>
+    <a data-target="auto" onclick="goTo('auto')">🔄</a>
+    <a data-target="projects" onclick="goTo('projects')">📁</a>
+    <a data-target="kb" onclick="goTo('kb')">📚</a>
+    <a data-target="finance" onclick="goTo('finance')">💰</a>
+    <a data-target="review" onclick="goTo('review')">📊</a>
+  </div>
+  <div class="spacer"></div>
+  <div class="mic-btn" id="micBtn" onclick="toggleDictate()" title="语音录入 / Dictate / बोलें">🎙</div>
+</div>
+
+<!-- —— 主区 —— -->
 <main>
 
-<!-- ——— 首页（极简：直接 2x2 卡片） ——— -->
+<!-- 首页总览 -->
 <section class="panel show" data-panel="overview">
-  <div class="grid c3">
-    <div class="card" onclick="goTo('reminders')">
-      <div class="bigico">⏰</div>
-      <div class="lbl"><span class="zh-text">提醒</span><span class="en-text">Reminders</span><span class="hi-text">रिमाइंडर</span></div>
-      <div class="val">5 <span style="font-size:12px;color:var(--muted);font-weight:500"><span class="zh-text">待办</span><span class="en-text">to do</span><span class="hi-text">काम</span></span></div>
-      <div class="meta"><span class="zh-text">今日 3 项已过半 · 2 项待做</span><span class="en-text">3 done · 2 left</span><span class="hi-text">3 हुए · 2 बाकी</span></div>
-    </div>
-    <div class="card" onclick="goTo('auto')">
-      <div class="bigico">🔄</div>
-      <div class="lbl"><span class="zh-text">自动</span><span class="en-text">Daily</span><span class="hi-text">डेली</span></div>
-      <div class="val">2/3 <span style="font-size:12px;color:var(--muted);font-weight:500"><span class="zh-text">习惯</span><span class="en-text">habits</span><span class="hi-text">आदतें</span></span></div>
-      <div class="meta"><span class="zh-text">读书✓ 运动✓ 播客·</span><span class="en-text">read✓ move✓ podcast·</span><span class="hi-text">पढ़ें✓ चलें✓ पॉड·</span></div>
-    </div>
-    <div class="card" onclick="goTo('projects')">
-      <div class="bigico">📁</div>
-      <div class="lbl"><span class="zh-text">项目</span><span class="en-text">Projects</span><span class="hi-text">प्रोजेक्ट</span></div>
-      <div class="val">4 <span style="font-size:12px;color:var(--muted);font-weight:500"><span class="zh-text">进行中</span><span class="en-text">active</span><span class="hi-text">चालू</span></span></div>
-      <div class="meta"><span class="zh-text">2 客户 · 1 自媒体 · 1 样品</span><span class="en-text">2 clients · 1 media · 1 sample</span><span class="hi-text">2 ग्राहक · 1 मीडिया</span></div>
-    </div>
-    <div class="card" onclick="goTo('kb')">
-      <div class="bigico">📚</div>
-      <div class="lbl"><span class="zh-text">知识库</span><span class="en-text">Knowledge</span><span class="hi-text">ज्ञान</span></div>
-      <div class="val">12 <span style="font-size:12px;color:var(--muted);font-weight:500"><span class="zh-text">条</span><span class="en-text">items</span><span class="hi-text">वस्तु</span></span></div>
-      <div class="meta"><span class="zh-text">书/培训/说明书/视频</span><span class="en-text">books/train/manual/video</span><span class="hi-text">किताब/ट्रेन/मैनुअल/वीडियो</span></div>
-    </div>
-    <div class="card" onclick="goTo('finance')">
-      <div class="bigico">💰</div>
-      <div class="lbl"><span class="zh-text">记账</span><span class="en-text">Money</span><span class="hi-text">पैसा</span></div>
-      <div class="val">¥12.2<span style="font-size:12px">万</span></div>
-      <div class="meta"><span class="zh-text">本月净利 ▲23%</span><span class="en-text">net ▲23%</span><span class="hi-text">शुद्ध ▲23%</span></div>
-    </div>
-    <div class="card" onclick="goTo('review')">
-      <div class="bigico">📊</div>
-      <div class="lbl"><span class="zh-text">复盘</span><span class="en-text">Review</span><span class="hi-text">समीक्षा</span></div>
-      <div class="val"><span class="zh-text">周待做</span><span class="en-text">Weekly</span><span class="hi-text">साप्ताहिक</span></div>
-      <div class="meta"><span class="zh-text">周一自动生成</span><span class="en-text">auto Mon</span><span class="hi-text">सोमवार ऑटो</span></div>
-    </div>
-  </div>
-  <div class="voice-inbox" id="voiceBox-inbox"></div>
+  <div class="page-head"><h1><span class="zh-text">首页总览</span><span class="en-text">Overview</span><span class="hi-text">अवलोकन</span></h1>
+    <div class="desc"><span class="zh-text">七大板块一屏掌握，数据云端永久留存</span><span class="en-text">All seven boards at a glance · cloud-persistent</span><span class="hi-text">सातों बोर्ड · क्लाउड में सुरक्षित</span></div></div>
+  <div class="grid c3" id="overviewCards"></div>
+  <div class="sec-title">🎙 <span class="zh-text">语音速记（未归类）</span><span class="en-text">Voice inbox</span><span class="hi-text">वॉयस इनबॉक्स</span></div>
+  <div id="voiceBox-inbox"></div>
 </section>
 
-<!-- ——— 提醒 ——— -->
+<!-- 提醒 -->
 <section class="panel" data-panel="reminders">
-  <div class="voice-box" id="voiceBox-reminders"></div>
-  <div class="sec-title">🌅 <span class="zh-text">上午</span><span class="en-text">Morning</span><span class="hi-text">सुबह</span></div>
-  <div class="tgroup">
-    <div class="titem">
-      <div class="chk done" onclick="this.classList.toggle('done')">✓</div>
-      <div class="body"><div class="ti"><span class="zh-text">回访 Raj 样品物流</span><span class="en-text">Follow Raj sample</span><span class="hi-text">Raj सैंपल</span></div><div class="me"><span class="zh-text">反向贸易 · 确认是否签收</span><span class="en-text">reverse · confirm receipt</span><span class="hi-text">रिवर्स · पुष्टि</span></div></div>
-      <div class="time">09:00<span class="dur">15′</span></div>
-    </div>
-    <div class="titem">
-      <div class="chk" onclick="this.classList.toggle('done')"></div>
-      <div class="body"><div class="ti"><span class="zh-text">剪一条抖音口播视频</span><span class="en-text">Film one Douyin clip</span><span class="hi-text">एक वीडियो काटें</span></div><div class="me"><span class="zh-text">钩子+干货+引导 3 句话</span><span class="en-text">hook+value+CTA</span><span class="hi-text">हुक+मूल्य+कॉल</span></div></div>
-      <div class="time">11:00<span class="dur">30′</span></div>
-    </div>
+  <div class="page-head"><h1><span class="zh-text">提醒</span><span class="en-text">Reminders</span><span class="hi-text">रिमाइंडर</span></h1>
+    <div class="desc"><span class="zh-text">统一归集全部待办：事项、时间节点、预估时长；自动化/订单跟进/库存任务全部汇总，到期推送</span><span class="en-text">All todos in one place · due push</span><span class="hi-text">सभी काम यहाँ · समय पर याद</span></div></div>
+  <div class="row-actions">
+    <button class="btn accent" onclick="openReminderModal()"><span class="zh-text">+ 手动添加</span><span class="en-text">+ Add</span><span class="hi-text">+ जोड़ें</span></button>
+    <button class="btn" onclick="checkDue()"><span class="zh-text">检查到期</span><span class="en-text">Check due</span><span class="hi-text">देखें</span></button>
   </div>
-  <div class="sec-title">🌇 <span class="zh-text">下午</span><span class="en-text">Afternoon</span><span class="hi-text">दोपहर</span></div>
-  <div class="tgroup">
-    <div class="titem">
-      <div class="chk" onclick="this.classList.toggle('done')"></div>
-      <div class="body"><div class="ti"><span class="zh-text">发 Delhi 客户银饰报价</span><span class="en-text">Send Delhi silver quote</span><span class="hi-text">Delhi को भाव</span></div><div class="me"><span class="zh-text">200 条手链 · 双语 PDF</span><span class="en-text">200 bracelets · bilingual</span><span class="hi-text">200 चूड़ी · द्विभाषी</span></div></div>
-      <div class="time">14:00<span class="dur">20′</span></div>
-    </div>
-    <div class="titem">
-      <div class="chk" onclick="this.classList.toggle('done')"></div>
-      <div class="body"><div class="ti"><span class="zh-text">整理今日客户沟通到档案</span><span class="en-text">File today's chats</span><span class="hi-text">आज की चैट सहेजें</span></div><div class="me"><span class="zh-text">口述即可，AI 整理入库</span><span class="en-text">just speak, AI files it</span><span class="hi-text">बोलें, AI सहेजेगा</span></div></div>
-      <div class="time">16:30<span class="dur">25′</span></div>
-    </div>
-  </div>
-  <div class="sec-title">🌙 <span class="zh-text">晚上</span><span class="en-text">Evening</span><span class="hi-text">शाम</span></div>
-  <div class="tgroup">
-    <div class="titem">
-      <div class="chk" onclick="this.classList.toggle('done')"></div>
-      <div class="body"><div class="ti"><span class="zh-text">读书 30 页 + 写笔记</span><span class="en-text">Read 30pp + notes</span><span class="hi-text">30 पृष्ठ + नोट</span></div><div class="me"><span class="zh-text">存入知识库，标「怎么用」</span><span class="en-text">save to KB, tag usage</span><span class="hi-text">KB में सहेजें</span></div></div>
-      <div class="time">19:00<span class="dur">40′</span></div>
-    </div>
-    <div class="titem">
-      <div class="chk" onclick="this.classList.toggle('done')"></div>
-      <div class="body"><div class="ti"><span class="zh-text">口述今日复盘给 AI</span><span class="en-text">Dictate today's review</span><span class="hi-text">आज की समीक्षा बोलें</span></div><div class="me"><span class="zh-text">AI 纠错+归档+提醒明天</span><span class="en-text">AI fixes+saves+reminds</span><span class="hi-text">AI ठीक+सहेजे+याद</span></div></div>
-      <div class="time">21:00<span class="dur">15′</span></div>
-    </div>
-  </div>
+  <div class="tlist" id="reminderList"></div>
 </section>
 
-<!-- ——— 自动（每日习惯 + 已设自动化） ——— -->
+<!-- 自动 -->
 <section class="panel" data-panel="auto">
-  <div class="sec-title">🔁 <span class="zh-text">每日习惯</span><span class="en-text">Daily habits</span><span class="hi-text">डेली आदतें</span></div>
-  <div class="grid c3">
-    <div class="card done" onclick="this.classList.toggle('done')">
-      <div class="bigico">📖</div>
-      <div class="lbl"><span class="zh-text">读书</span><span class="en-text">Read</span><span class="hi-text">पढ़ें</span></div>
-      <div class="val">30<span style="font-size:12px;color:var(--muted);font-weight:500"> 分钟</span></div>
-      <div class="meta"><span class="zh-text">点一下标记今日完成</span><span class="en-text">tap to mark done</span><span class="hi-text">टैप करें</span></div>
-    </div>
-    <div class="card done" onclick="this.classList.toggle('done')">
-      <div class="bigico">🏃</div>
-      <div class="lbl"><span class="zh-text">运动</span><span class="en-text">Exercise</span><span class="hi-text">व्यायाम</span></div>
-      <div class="val">40<span style="font-size:12px;color:var(--muted);font-weight:500"> 分钟</span></div>
-      <div class="meta"><span class="zh-text">点一下标记今日完成</span><span class="en-text">tap to mark done</span><span class="hi-text">टैप करें</span></div>
-    </div>
-    <div class="card" onclick="this.classList.toggle('done')">
-      <div class="bigico">🎧</div>
-      <div class="lbl"><span class="zh-text">播客</span><span class="en-text">Podcast</span><span class="hi-text">पॉडकास्ट</span></div>
-      <div class="val">20<span style="font-size:12px;color:var(--muted);font-weight:500"> 分钟</span></div>
-      <div class="meta"><span class="zh-text">点一下标记今日完成</span><span class="en-text">tap to mark done</span><span class="hi-text">टैप करें</span></div>
-    </div>
-  </div>
+  <div class="page-head"><h1><span class="zh-text">自动 Daily</span><span class="en-text">Daily Automation</span><span class="hi-text">ऑटो डेली</span></h1>
+    <div class="desc"><span class="zh-text">3 套永久定时自动化 + 每日打卡</span><span class="en-text">3 fixed automations + daily check-in</span><span class="hi-text">3 ऑटो + रोज़ चेक-इन</span></div></div>
 
-  <div class="sec-title">🔥 <span class="zh-text">爆款实时抓取</span><span class="en-text">Trending now</span><span class="hi-text">ट्रेंडिंग</span> <button class="trend-refresh" onclick="refreshTrends()" title="刷新 Refresh">⟳</button></div>
+  <div class="sec-title">⚙️ <span class="zh-text">永久定时自动化（3 套）</span><span class="en-text">Fixed automations</span><span class="hi-text">3 ऑटो</span></div>
+  <div class="grid c1" id="autoList"></div>
+
+  <div class="sec-title">✅ <span class="zh-text">固定日常打卡</span><span class="en-text">Daily check-in</span><span class="hi-text">रोज़ चेक-इन</span></div>
+  <div class="grid c3" id="checkinList"></div>
+
+  <div class="sec-title">🔥 <span class="zh-text">每日自媒体热点采集</span><span class="en-text">Daily trending</span><span class="hi-text">रोज़ ट्रेंड</span>
+    <button class="trend-refresh" onclick="refreshTrends()" title="刷新">⟳</button></div>
   <div class="trend-tabs" id="trendTabs">
-    <button class="on" data-p="all">全部 All</button>
-    <button data-p="douyin">抖音 Douyin</button>
-    <button data-p="bili">B站 Bilibili</button>
-    <button data-p="weibo">微博 Weibo</button>
-    <button data-p="ig">IG (印)</button>
-    <button data-p="x">X (印)</button>
+    <button class="on" data-p="cn">国内 Douyin/RED/Weibo</button>
+    <button data-p="in">印度 YouTube/IG</button>
   </div>
   <div class="trend-list" id="trendList"></div>
-  <div class="trend-note">⚠ <span class="zh-text">实时抓取需接入各平台 API（豆包/抖音/B站/微博/IG/X）。当前为示例数据，点 ⟳ 可手动重排。</span><span class="en-text">Real-time fetch needs platform APIs (Douyin/Bili/Weibo/IG/X). Sample data shown, tap ⟳ to reshuffle.</span><span class="hi-text">लाइव डेटा के लिए API चाहिए (डॉयिन/बिली/वीबो/IG/X)। नमूना डेटा, ⟳ से बदलें।</span></div>
-
-  <div class="sec-title">⚙️ <span class="zh-text">已设自动化</span><span class="en-text">Automation set</span><span class="hi-text">ऑटो सेट</span></div>
-  <div class="grid c3">
-    <div class="card"><div class="bigico">🤖</div><div class="lbl"><span class="zh-text">客户归档</span><span class="en-text">Archive</span><span class="hi-text">सहेजें</span></div><div class="meta">21:00 <span class="zh-text">每日</span><span class="en-text">daily</span><span class="hi-text">रोज़</span></div></div>
-    <div class="card"><div class="bigico">🔔</div><div class="lbl"><span class="zh-text">客户回访</span><span class="en-text">Follow-up</span><span class="hi-text">फॉलो-अप</span></div><div class="meta">09:00 <span class="zh-text">每日</span><span class="en-text">daily</span><span class="hi-text">रोज़</span></div></div>
-    <div class="card"><div class="bigico">💡</div><div class="lbl"><span class="zh-text">选题推送</span><span class="en-text">Topic push</span><span class="hi-text">विषय पुश</span></div><div class="meta">08:00 <span class="zh-text">每日</span><span class="en-text">daily</span><span class="hi-text">रोज़</span></div></div>
-  </div>
+  <div class="trend-note"><span class="zh-text">⚠ 实时抓取需接入各平台 API（抖音/小红书/微博/YouTube/IG）。当前为示例数据，点 ⟳ 重排。每日输出：国内 10 条选题 + 印度 5 条二创。</span><span class="en-text">Live fetch needs platform APIs. Sample data shown. Daily output: 10 CN topics + 5 IN ideas.</span><span class="hi-text">लाइव डेटा के लिए API चाहिए। नमूना: 10 चीन + 5 भारत।</span></div>
 </section>
 
-<!-- ——— 项目（对接的各位客户） ——— -->
+<!-- 项目 -->
 <section class="panel" data-panel="projects">
-  <div class="voice-box" id="voiceBox-projects"></div>
-  <div class="sec-title">📁 <span class="zh-text">进行中</span><span class="en-text">In progress</span><span class="hi-text">चालू</span></div>
-  <div class="tgroup">
-    <div class="titem">
-      <div class="body"><div class="ti"><span class="zh-text">Raj（印度）· 手机壳样品</span><span class="en-text">Raj (India) · phone cases</span><span class="hi-text">Raj · फोन केस</span></div><div class="me"><span class="zh-text">状态：寄样中 · 下一步：跟进物流</span><span class="en-text">sampling · next: track shipping</span><span class="hi-text">सैंपल · अगला: शिपिंग</span></div></div>
-      <span class="pill st">寄样中</span>
-    </div>
-    <div class="titem">
-      <div class="body"><div class="ti"><span class="zh-text">Delhi 批发商 · 银饰 200 条</span><span class="en-text">Delhi wholesaler · 200 silver</span><span class="hi-text">Delhi · 200 चांदी</span></div><div class="me"><span class="zh-text">状态：谈价中 · 下一步：发双语报价</span><span class="en-text">pricing · next: send quote</span><span class="hi-text">भाव · अगला: भाव भेजें</span></div></div>
-      <span class="pill st">谈价中</span>
-    </div>
-    <div class="titem">
-      <div class="body"><div class="ti"><span class="zh-text">王姐（沈阳）· 银手链 200</span><span class="en-text">Wang (Shenyang) · 200 bracelets</span><span class="hi-text">Wang · 200 चूड़ी</span></div><div class="me"><span class="zh-text">状态：3 天未回 · 下一步：发跟进话术</span><span class="en-text">3d no reply · next: nudge</span><span class="hi-text">3 दिन · अगला: याद</span></div></div>
-      <span class="pill st warn">待跟进</span>
-    </div>
-    <div class="titem">
-      <div class="body"><div class="ti"><span class="zh-text">自媒体账号 · 抖音/哔哩哔哩</span><span class="en-text">Social · Douyin/Bilibili</span><span class="hi-text">सोशल · डॉयिन/बिलीबिली</span></div><div class="me"><span class="zh-text">状态：运营中 · 下一步：日更选题</span><span class="en-text">running · next: daily topic</span><span class="hi-text">चल रहा · अगला: रोज़ विषय</span></div></div>
-      <span class="pill st">运营中</span>
-    </div>
+  <div class="page-head"><h1><span class="zh-text">项目 · 客户订单台账</span><span class="en-text">Projects · Client ledger</span><span class="hi-text">प्रोजेक्ट · लेज़र</span></h1>
+    <div class="desc"><span class="zh-text">按客户独立分组存档；语音口述录单自动结构化；自动生成三大跟进节点</span><span class="en-text">Grouped by client · voice order entry · auto follow-ups</span><span class="hi-text">ग्राहक अनुसार · वॉयस ऑर्डर · ऑटो फॉलो-अप</span></div></div>
+  <div class="row-actions">
+    <button class="btn" onclick="openClientModal()"><span class="zh-text">+ 新增客户</span><span class="en-text">+ Client</span><span class="hi-text">+ ग्राहक</span></button>
   </div>
+  <div id="clientList"></div>
 </section>
 
-<!-- ——— 知识库 / skill ——— -->
+<!-- 知识库 -->
 <section class="panel" data-panel="kb">
-  <div class="voice-box" id="voiceBox-kb"></div>
-  <div class="kb-toggle" onclick="this.nextElementSibling.classList.toggle('open');this.querySelector('.arr').textContent=this.nextElementSibling.classList.contains('open')?'▴':'▾';">ℹ️ <span class="zh-text">怎么用</span><span class="en-text">How it works</span><span class="hi-text">कैसे</span> <span class="arr">▾</span></div>
-  <div class="kbnote">
-    <b><span class="zh-text">知识库怎么用：</span><span class="en-text">How KB works: </span><span class="hi-text">KB कैसे: </span></b>
-    <span class="zh-text">把看到的任何信息（书 / 培训 / 说明书 / 内容视频）说给 AI → 它提炼存入知识库，并告诉你「怎么学、怎么用」→ 碰到问题直接问，AI 从库里调取能解决的方案。中英文都行，AI 顺手帮你纠错。</span>
-    <span class="en-text">Tell AI anything you see (book/training/manual/video) → it extracts & saves to KB and shows how to learn/use it → when stuck, just ask, AI pulls a solution from the KB. Chinese or English, AI auto-corrects as you go.</span>
-    <span class="hi-text">AI से कुछ भी बोलें (किताब/ट्रेनिंग/मैनुअल/वीडियो) → वह निकालकर KB में सहेजेगा और बताएगा कैसे सीखें → फँसें तो पूछें, AI हल निकालेगा। हिंदी/अंग्रेज़ी, AI गलती ठीक करेगा।</span>
+  <div class="page-head"><h1><span class="zh-text">知识库</span><span class="en-text">Knowledge</span><span class="hi-text">ज्ञान</span></h1>
+    <div class="desc"><span class="zh-text">语音/文字录入 → AI 提炼「问题关键词 + 处理步骤 + 落地方法」；自动生成同义检索标签</span><span class="en-text">AI extracts 3 parts · auto synonym tags</span><span class="hi-text">AI 3 भाग · ऑटो टैग</span></div></div>
+  <div class="row-actions">
+    <button class="btn pri" onclick="openKbModal()"><span class="zh-text">+ 新增知识</span><span class="en-text">+ Add</span><span class="hi-text">+ जोड़ें</span></button>
   </div>
-  <div class="sec-title">📚 <span class="zh-text">已存知识</span><span class="en-text">Stored</span><span class="hi-text">सहेजा</span></div>
-  <div class="grid c2">
-    <div class="card"><div class="bigico">📖</div><div class="lbl"><span class="zh-text">书《跨境物流实战》</span><span class="en-text">Book: Cross-border Logistics</span><span class="hi-text">किताब: लॉजिस्टिक्स</span></div><div class="meta"><span class="zh-text">怎么用：清关资料清单模板</span><span class="en-text">use: customs checklist</span><span class="hi-text">उपयोग: कस्टम लिस्ट</span></div></div>
-    <div class="card"><div class="bigico">🎓</div><div class="lbl"><span class="zh-text">培训：短视频起号</span><span class="en-text">Training: grow an account</span><span class="hi-text">ट्रेनिंग: अकाउंट बढ़ाना</span></div><div class="meta"><span class="zh-text">怎么用：3 秒钩子公式</span><span class="en-text">use: 3-sec hook</span><span class="hi-text">उपयोग: 3 सेक हुक</span></div></div>
-    <div class="card"><div class="bigico">📄</div><div class="lbl"><span class="zh-text">说明书：银饰保养</span><span class="en-text">Manual: silver care</span><span class="hi-text">मैनुअल: चांदी देखभाल</span></div><div class="meta"><span class="zh-text">怎么用：客户 FAQ 话术</span><span class="en-text">use: client FAQ</span><span class="hi-text">उपयोग: ग्राहक FAQ</span></div></div>
-    <div class="card"><div class="bigico">🎬</div><div class="lbl"><span class="zh-text">视频：印度婚礼采购</span><span class="en-text">Video: Indian wedding buy</span><span class="hi-text">वीडियो: भारतीय शादी</span></div><div class="meta"><span class="zh-text">怎么用：选题库第 5 条</span><span class="en-text">use: topic #5</span><span class="hi-text">उपयोग: विषय #5</span></div></div>
-  </div>
-  <div class="kbtip">💬 <span class="zh-text">碰到问题？对着 🎙 直接说，AI 从知识库调取方案。</span><span class="en-text">Stuck? Tap 🎙 and ask, AI pulls from KB.</span><span class="hi-text">फँसे? 🎙 दबाएं, AI KB से निकालेगा।</span></div>
+  <div id="kbList"></div>
 </section>
 
-<!-- ——— 记账 ——— -->
+<!-- 记账 -->
 <section class="panel" data-panel="finance">
-  <div class="voice-box" id="voiceBox-finance"></div>
-  <div class="hero alt">
-    <div class="day"><span class="zh-text">本月财务</span><span class="en-text">This month</span><span class="hi-text">इस माह</span></div>
-    <h1>¥ 12.2 <span style="opacity:.7">万</span></h1>
-    <div class="meta"><span class="zh-text">净利 · 收入 18.4 万 · 支出 6.2 万 · ▲ 23%</span><span class="en-text">net · 18.4 income · 6.2 cost · ▲ 23%</span><span class="hi-text">शुद्ध · 18.4 आय · 6.2 खर्च · ▲ 23%</span></div>
+  <div class="page-head"><h1><span class="zh-text">记账</span><span class="en-text">Finance</span><span class="hi-text">पैसा</span></h1>
+    <div class="desc"><span class="zh-text">语音口述收支自动归档；关联订单自动核算利润；支出分类</span><span class="en-text">Voice income/expense · auto profit · categories</span><span class="hi-text">वॉयस आय/खर्च · ऑटो मुनाफा</span></div></div>
+  <div class="row-actions">
+    <button class="btn" onclick="openFinanceModal()"><span class="zh-text">+ 手动记账</span><span class="en-text">+ Add</span><span class="hi-text">+ जोड़ें</span></button>
   </div>
-  <div class="grid c3">
-    <div class="card"><div class="bigico">💵</div><div class="lbl"><span class="zh-text">本月收入</span><span class="en-text">Income</span><span class="hi-text">आय</span></div><div class="val">¥ 18.4<span style="font-size:12px">万</span></div></div>
-    <div class="card"><div class="bigico">💸</div><div class="lbl"><span class="zh-text">本月支出</span><span class="en-text">Cost</span><span class="hi-text">खर्च</span></div><div class="val">¥ 6.2<span style="font-size:12px">万</span></div></div>
-    <div class="card"><div class="bigico">📈</div><div class="lbl"><span class="zh-text">被动收入</span><span class="en-text">Passive</span><span class="hi-text">निष्क्रिय</span></div><div class="val">18%</div></div>
-  </div>
+  <div class="grid c3" id="financeStats"></div>
+  <div class="sec-title">📒 <span class="zh-text">收支流水</span><span class="en-text">Records</span><span class="hi-text">रिकॉर्ड</span></div>
+  <div id="financeList"></div>
 </section>
 
-<!-- ——— 复盘 ——— -->
+<!-- 复盘 -->
 <section class="panel" data-panel="review">
-  <div class="voice-box" id="voiceBox-review"></div>
-  <div class="hero lav">
-    <div class="day"><span class="zh-text">复盘</span><span class="en-text">Reviews</span><span class="hi-text">समीक्षा</span></div>
-    <h1><span class="zh-text">周 / 月 / 年</span><span class="en-text">W / M / Y</span><span class="hi-text">स / म / व</span></h1>
-  </div>
-  <div class="grid c3">
-    <div class="card"><div class="bigico">📅</div><div class="lbl"><span class="zh-text">周复盘</span><span class="en-text">Weekly</span><span class="hi-text">साप्ताहिक</span></div><div class="meta"><span class="zh-text">每周一自动</span><span class="en-text">auto Mon</span><span class="hi-text">सोमवार ऑटो</span></div></div>
-    <div class="card"><div class="bigico">📊</div><div class="lbl"><span class="zh-text">月复盘</span><span class="en-text">Monthly</span><span class="hi-text">मासिक</span></div><div class="meta"><span class="zh-text">月底自动</span><span class="en-text">auto month-end</span><span class="hi-text">माह के अंत में</span></div></div>
-    <div class="card"><div class="bigico">🎯</div><div class="lbl"><span class="zh-text">年度目标</span><span class="en-text">Yearly goal</span><span class="hi-text">वार्षिक लक्ष्य</span></div><div class="meta"><span class="zh-text">工作减半 / 收入翻倍</span><span class="en-text">half work / 2x income</span><span class="hi-text">आधा काम / दोगुनी आय</span></div></div>
-  </div>
+  <div class="page-head"><h1><span class="zh-text">复盘</span><span class="en-text">Review</span><span class="hi-text">समीक्षा</span></h1>
+    <div class="desc"><span class="zh-text">自动汇总：库存复盘 / 客户成交复盘 / 自媒体数据复盘 / 月度年度目标进度</span><span class="en-text">Auto summary across boards</span><span class="hi-text">ऑटो सारांश</span></div></div>
+  <div class="grid c2" id="reviewCards"></div>
+  <div class="sec-title">📊 <span class="zh-text">客户成交复盘</span><span class="en-text">Deal review</span><span class="hi-text">डील रिव्यू</span></div>
+  <div id="reviewClients"></div>
+  <div class="sec-title">📈 <span class="zh-text">自媒体数据复盘</span><span class="en-text">Social review</span><span class="hi-text">सोशल रिव्यू</span></div>
+  <div class="hint" id="reviewSocial"></div>
 </section>
+
 </main>
 
-<!-- 🎙 浮动按钮：讲述录入（语音输入） -->
-<button class="fab fab-stt" id="micBtn" onclick="toggleDictate()" title="讲述录入 / Dictate / बोलें">🎙</button>
-
-<!-- 讲述录入面板 -->
+<!-- 语音录入面板 -->
 <div class="dictate" id="dictate">
   <div class="dictate-head">
-    <span id="dictState"><span class="dot"></span> <span class="zh-text">点 🎙 开始讲述</span><span class="en-text">Tap 🎙 to speak</span><span class="hi-text">🎙 दबाएं बोलने</span></span>
+    <span id="dictState"><span class="dot"></span> <span class="zh-text">点 🎙 或底部麦克风开始讲述</span><span class="en-text">Tap 🎙 to speak</span><span class="hi-text">🎙 दबाएं बोलने</span></span>
     <button class="dict-close" onclick="closeDictate()" title="关闭 Close">✕</button>
   </div>
   <div class="dict-lang">
     <button data-l="zh-CN" onclick="setDictLang(this,'zh-CN')">中</button>
     <button data-l="en-US" onclick="setDictLang(this,'en-US')">EN</button>
     <button data-l="hi-IN" onclick="setDictLang(this,'hi-IN')">हि</button>
-    <span class="dl-hint"><span class="zh-text">混讲选主导语言，转完可改</span><span class="en-text">pick main lang, edit after</span><span class="hi-text">मुख्य भाषा चुनें</span></span></span>
+    <span class="dl-hint"><span class="zh-text">混讲选主导语言，转完可改</span><span class="en-text">pick main lang, edit after</span><span class="hi-text">मुख्य भाषा चुनें</span></span>
   </div>
   <textarea id="dictInput" class="dict-input" placeholder="说完后文字出现在这里，可直接修改 / text appears here, editable / यहाँ टाइप करें"></textarea>
   <div class="dict-actions">
-    <button class="da-ghost" onclick="clearDict()"><span class="zh-text">清除</span><span class="en-text">Clear</span><span class="hi-text">साफ़</span></span></button>
-    <button class="da-primary" onclick="saveDict()"><span class="zh-text">保存笔记</span><span class="en-text">Save</span><span class="hi-text">सहेजें</span></span></button>
+    <button class="da-ghost" onclick="clearDict()"><span class="zh-text">清除</span><span class="en-text">Clear</span><span class="hi-text">साफ़</span></button>
+    <button class="da-primary" onclick="saveDict()"><span class="zh-text">保存并归档</span><span class="en-text">Save & file</span><span class="hi-text">सहेजें</span></button>
   </div>
-  <div class="dict-notes" id="dictNotes"></div>
-  <div class="dict-foot"><span class="zh-text">讲完可改文字再保存 · AI 按关键词自动归入对应板块（提醒/项目/知识库/记账/复盘）</span><span class="en-text">Edit then save · AI auto-files by keyword (reminders/projects/KB/money/review)</span><span class="hi-text">बदलें फ़िर सहेजें · AI ख़ुद वर्गीकृत करता है</span></span></div>
+  <div class="dict-foot"><span class="zh-text">保存后 AI 按内容自动归入对应板块（提醒/项目/知识库/记账/复盘），并拆分待办推入提醒</span><span class="en-text">AI auto-files by content & pushes todos to Reminders</span><span class="hi-text">AI ख़ुद वर्गीकृत करता है</span></span></div>
 </div>
 
-<script>
-  // 语言切换
-  const LANG_CYCLE=['both','zh','en','hi'];
-  const LANG_ICON={'both':'🌐','zh':'中','en':'EN','hi':'अ'};
-  function setLang(l){
-    document.body.className='lang-'+l;
-    const btn=document.getElementById('langBtn');
-    if(btn) btn.textContent=LANG_ICON[l]||'🌐';
-  }
-  function cycleLang(){
-    const cur=document.body.className.replace('lang-','')||'both';
-    const next=LANG_CYCLE[(LANG_CYCLE.indexOf(cur)+1)%LANG_CYCLE.length];
-    setLang(next);
-  }
-  function goTo(t){
-    document.querySelectorAll('.sidebar [data-target]').forEach(x=>x.classList.remove('active'));
-    const a=document.querySelector('.sidebar [data-target="'+t+'"]'); if(a) a.classList.add('active');
-    document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('show',p.dataset.panel===t));
-    window.scrollTo({top:0,behavior:'smooth'});
-  }
-  document.querySelectorAll('.sidebar [data-target]').forEach(a=>a.addEventListener('click',e=>{
-    e.preventDefault(); goTo(a.dataset.target);
-  }));
+<!-- 通用弹窗 -->
+<div class="modal" id="modal"><div class="box"><div class="mh"><span id="modalTitle"></span><button class="x" onclick="closeModal()">✕</button></div><div class="mb" id="modalBody"></div></div></div>
 
-  // —— 讲述录入（语音输入 / Speech-to-Text，转完可改）——
-  let recog=null, dictating=false, finalTranscript='', selectedLang='en-US';
-  function recLang(){
-    const c=document.body.className;
-    if(c.includes('lang-hi')) return 'hi-IN';
-    if(c.includes('lang-en')) return 'en-US';
-    if(c.includes('lang-zh')) return 'zh-CN';
-    return 'en-US';
-  }
-  function setDictLang(btn,lang){
-    selectedLang=lang;
-    document.querySelectorAll('.dict-lang button').forEach(b=>b.classList.remove('on'));
-    if(btn) btn.classList.add('on');
-    if(dictating && recog){ try{recog.stop();}catch(_){} }  // onend 会用新语言重启
-  }
-  function initRecog(){
-    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-    if(!SR){alert('当前浏览器不支持语音录入，请用 Chrome 打开');return null;}
-    const r=new SR();
-    r.continuous=true; r.interimResults=true; r.lang=selectedLang;
-    r.onresult=function(e){
-      let inter='';
-      for(let i=e.resultIndex;i<e.results.length;i++){
-        const t=e.results[i][0].transcript;
-        if(e.results[i].isFinal) finalTranscript+=t; else inter=t;
-      }
-      const ta=document.getElementById('dictInput');
-      ta.value=finalTranscript+(inter?(' '+inter):'');
-      ta.scrollTop=ta.scrollHeight;
-    };
-    r.onend=function(){ if(dictating){ try{r.lang=selectedLang; r.start();}catch(_){} } };
-    r.onerror=function(){};
-    return r;
-  }
-  function toggleDictate(){
-    const panel=document.getElementById('dictate');
-    const btn=document.getElementById('micBtn');
-    const state=document.getElementById('dictState');
-    const ta=document.getElementById('dictInput');
-    if(!dictating){
-      recog=initRecog();
-      if(!recog) return;
-      finalTranscript=ta.value.trim();          // 续讲时从已编辑文字继续
-      panel.classList.add('open');
-      btn.classList.add('recording');
-      state.innerHTML='<span class="dot rec"></span> <span class="zh-text">聆听中…</span><span class="en-text">Listening…</span><span class="hi-text">सुन रहा…</span>';
-      dictating=true;
-      try{recog.start();}catch(_){}
-    } else {
-      dictating=false;
-      btn.classList.remove('recording');
-      if(recog) try{recog.stop();}catch(_){}
-      state.innerHTML='<span class="dot"></span> <span class="zh-text">可改文字后保存</span><span class="en-text">Edit then save</span><span class="hi-text">बदलें फिर सहेजें</span>';
-      // 保留文字在文本框，等用户改好再点「保存笔记」
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ 全局语言（单语种） ============ */
+const LANG_CYCLE=['zh','en','hi'];
+const LANG_ICON={'zh':'中','en':'EN','hi':'अ'};
+let LANG='zh';
+function setLang(l){
+  LANG=l; document.body.className='lang-'+l;
+  const b=document.getElementById('langCode'); if(b) b.textContent=LANG_ICON[l]||'中';
+  renderAll();
+}
+function cycleLang(){ const i=LANG_CYCLE.indexOf(LANG); setLang(LANG_CYCLE[(i+1)%LANG_CYCLE.length]); }
+function t(zh,en,hi){ return LANG==='en'?en : LANG==='hi'?hi : zh; }
+
+/* ============ 数据层 ============ */
+const DB_KEY='wb_db_v2';
+function loadDB(){ try{return JSON.parse(localStorage.getItem(DB_KEY))||null;}catch(_){return null;} }
+function saveDB(){ try{localStorage.setItem(DB_KEY,JSON.stringify(DB));}catch(_){} }
+let DB=loadDB()||{clients:[],kb:[],finance:[],reminders:[],notes:[],checkin:{date:'',read:false,exercise:false,podcast:false}};
+function uid(){return 'i'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function now(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+
+/* ============ 导航 ============ */
+function goTo(target){
+  document.querySelectorAll('.sidebar [data-target]').forEach(x=>x.classList.remove('active'));
+  const a=document.querySelector('.sidebar [data-target="'+target+'"]'); if(a) a.classList.add('active');
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('show',p.dataset.panel===target));
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(target==='projects') renderProjects();
+  if(target==='kb') renderKB();
+  if(target==='finance') renderFinance();
+  if(target==='reminders') renderReminders();
+  if(target==='review') renderReview();
+  if(target==='auto') renderAuto();
+  if(target==='overview') renderOverview();
+}
+
+/* ============ 轻提示 ============ */
+let toastTimer=null;
+function toast(msg){
+  let el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove('show'),1900);
+}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+/* ============ 语音录入（STT） ============ */
+let recog=null, dictating=false, finalTranscript='', selectedLang='zh-CN', editingId=null;
+function recLang(){
+  if(LANG==='hi') return 'hi-IN';
+  if(LANG==='en') return 'en-US';
+  return 'zh-CN';
+}
+function setDictLang(btn,lang){
+  selectedLang=lang;
+  document.querySelectorAll('.dict-lang button').forEach(b=>b.classList.remove('on'));
+  if(btn) btn.classList.add('on');
+  if(dictating && recog){ try{recog.stop();}catch(_){} }
+}
+function initRecog(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){toast(t('当前浏览器不支持语音，请用 Chrome','Browser unsupported','ब्राउज़र समर्थित नहीं'));return null;}
+  const r=new SR(); r.continuous=true; r.interimResults=true; r.lang=selectedLang;
+  r.onresult=function(e){
+    let inter='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      const tx=e.results[i][0].transcript;
+      if(e.results[i].isFinal) finalTranscript+=tx; else inter=tx;
     }
-  }
-  function closeDictate(){
-    dictating=false;
+    const ta=document.getElementById('dictInput'); ta.value=finalTranscript+(inter?(' '+inter):''); ta.scrollTop=ta.scrollHeight;
+  };
+  r.onend=function(){ if(dictating){ try{r.lang=selectedLang; r.start();}catch(_){} } };
+  r.onerror=function(){};
+  return r;
+}
+function toggleDictate(){
+  const panel=document.getElementById('dictate'), btn=document.getElementById('micBtn'), state=document.getElementById('dictState'), ta=document.getElementById('dictInput');
+  if(!dictating){
+    if(!editingId){ selectedLang=recLang(); document.querySelectorAll('.dict-lang button').forEach(b=>b.classList.toggle('on',b.getAttribute('data-l')===selectedLang)); }
+    recog=initRecog(); if(!recog) return;
+    finalTranscript=ta.value.trim();
+    panel.classList.add('open'); btn.classList.add('recording');
+    state.innerHTML='<span class="dot rec"></span> <span class="zh-text">聆听中…</span><span class="en-text">Listening…</span><span class="hi-text">सुन रहा…</span>';
+    dictating=true; try{recog.start();}catch(_){}
+  } else {
+    dictating=false; btn.classList.remove('recording');
     if(recog) try{recog.stop();}catch(_){}
-    document.getElementById('dictate').classList.remove('open');
-    document.getElementById('micBtn').classList.remove('recording');
-    document.getElementById('dictState').innerHTML='<span class="dot"></span> <span class="zh-text">点 🎙 开始讲述</span><span class="en-text">Tap 🎙 to speak</span><span class="hi-text">🎙 दबाएं बोलने</span>';
-    if(typeof editingId!=='undefined' && editingId){editingId=null;}
+    state.innerHTML='<span class="dot"></span> <span class="zh-text">可改文字后保存</span><span class="en-text">Edit then save</span><span class="hi-text">बदलें फिर सहेजें</span>';
   }
-  document.addEventListener('keydown',function(e){
-    if(e.key==='Escape'){
-      const p=document.getElementById('dictate');
-      if(p && p.classList.contains('open')) closeDictate();
+}
+function closeDictate(){
+  dictating=false;
+  if(recog) try{recog.stop();}catch(_){}
+  document.getElementById('dictate').classList.remove('open');
+  document.getElementById('micBtn').classList.remove('recording');
+  document.getElementById('dictState').innerHTML='<span class="dot"></span> <span class="zh-text">点 🎙 或底部麦克风开始讲述</span><span class="en-text">Tap 🎙 to speak</span><span class="hi-text">🎙 दबाएं बोलने</span>';
+  editingId=null;
+}
+document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ const p=document.getElementById('dictate'); if(p&&p.classList.contains('open')) closeDictate(); closeModal(); } });
+function clearDict(){ finalTranscript=''; document.getElementById('dictInput').value=''; editingId=null; }
+
+/* ============ 智能分类（关键词启发式） ============ */
+const CATS={
+  reminders:['提醒','待办','记得','别忘了','明天','今天','几点','安排','计划','回访','跟进','物流','签收','确认','预约','会议','截止','到期','发','买','做','去','remind','todo','remember','tomorrow','today','schedule','follow','meeting','deadline','appointment'],
+  projects:['客户','报价','样品','寄样','谈价','订单','采购','印度','中国','批发','银饰','手链','手机壳','合同','发票','发货','工厂','供应商','项目','对接','raj','delhi','client','customer','quote','quotation','sample','order','purchase','supplier','factory','invoice','contract','ship','shipping','deal','project','india','china','delhi'],
+  kb:['书','知识','培训','学','笔记','说明书','视频','怎么用','读','看','课程','资料','学到','整理','收藏','踩坑','经验','book','learn','learning','course','training','manual','note','study','read','watched','video','knowledge','experience'],
+  finance:['钱','收入','支出','账','付款','收到','费用','赚','花','成本','利润','收款','货款','定金','尾款','工资','报销','卢比','人民币','美元','汇率','money','income','cost','expense','paid','pay','received','payment','profit','salary','invoice','rupee','rmb','usd','rate','fee'],
+  review:['复盘','总结','反思','周报','月报','年报','本周','本月','今年','改进','review','weekly','monthly','yearly','summary','reflect']
+};
+const CAT_NAME={reminders:'提醒',projects:'项目',kb:'知识库',finance:'记账',review:'复盘',inbox:'速记'};
+const CAT_ORDER=['reminders','projects','finance','kb','review'];
+function categorize(text){
+  const s=' '+(text||'').toLowerCase()+' '; let best='inbox',bestN=0;
+  CAT_ORDER.forEach(cat=>{ let n=0; (CATS[cat]||[]).forEach(k=>{ if(s.includes(k.toLowerCase())) n++; }); if(n>bestN){bestN=n;best=cat;} });
+  return best;
+}
+
+/* ============ 保存语音/文字 → 分类归档 + 推提醒 ============ */
+/* 订单类语音意图：不依赖 categorize 结果，优先识别，杜绝“仅存提醒、不入账”
+   强信号：订单/order、数量单位（件/套…）、采购/报价+货品词；纯收支语句（货款/费用/利润）回落记账 */
+function isOrderVoice(text){
+  if(!/\d/.test(text)) return false;
+  if(text.includes('订单')||text.includes('order')) return true;
+  if(/[0-9]+\s*(?:件|条|个|套|只|箱|pcs|pieces)/i.test(text)) return true;
+  if(/(采购|报价|寄样|打样|订货|下订|备货)/.test(text) && /(货|品|商品|产品|手链|手镯|手机壳|银|项链|耳环|戒指|批发|样品)/.test(text)) return true;
+  return false;
+}
+function saveDict(){
+  const ta=document.getElementById('dictInput'); const text=ta.value.trim();
+  if(!text){ toast(t('文字为空','Empty','खाली')); return; }
+  // 编辑已有速记：直接更新
+  if(editingId){
+    const n=DB.notes.find(x=>x.id===editingId);
+    if(n){ n.text=text; n.t=now(); }
+    saveDB(); finalTranscript=''; ta.value=''; editingId=null;
+    closeDictate(); renderAll();
+    toast(t('已更新','Updated','अपडेट'));
+    return;
+  }
+  // 1) 订单类：优先检测 → 项目·客户台账 + 自动跟进提醒（核心修复）
+  if(isOrderVoice(text)){
+    const o=parseOrder(text);
+    if(o && o.goods){ openOrderConfirm(o, text); return; }
+  }
+  const cat=categorize(text);
+  // 2) 收支类 → 记账（categorize 命中，或含收支关键词兜底，避免与 projects 打平时漏记）
+  const isFin=/收(到|货)?款|回款|付款|付(款|费|清关|运费|物流)?|费用|花(掉|了)?|成本|报销|工资|利润|货款/.test(text);
+  if(cat==='finance' || (isFin && /\d/.test(text))){ autoFinanceFromVoice(text); return; }
+  // 3) 知识类 → 知识库
+  if(cat==='kb'){ autoKBFromVoice(text); return; }
+  // 4) 其余（纯待办/其他）→ 速记 + 推送提醒
+  const noteId=uid();
+  DB.notes.unshift({id:noteId,t:now(),text:text,cat:cat});
+  pushRemindersFromText(text, cat);
+  saveDB(); finalTranscript=''; ta.value=''; editingId=null;
+  closeDictate();
+  renderAll();
+  toast(t('已保存 · 归入「'+CAT_NAME[cat]+'」','Saved → '+CAT_NAME[cat],'सहेजा → '+CAT_NAME[cat]));
+}
+/* 语音收支 → 记账 */
+function autoFinanceFromVoice(text){
+  const am=text.match(/(?:[¥￥$]|rmb|usd|美元|美金|人民币)?\s*(\d[\d,]*(?:\.\d+)?)\s*(?:万|千|元|人民币|rmb|usd|美元|美金)?/i);
+  const amt=am?am[1].replace(/,/g,''):'';
+  const isIn=/收|收到|入账|回款|赚|利润|货款到|收款|进账/i.test(text);
+  const isOut=/付|支出|费用|花|成本|报销|工资|运费|清关|手续费|花掉|开掉/i.test(text);
+  const type=isIn&&!isOut?'in':isOut?'out':'out';
+  const cat=text.match(/(?:分类|类|用途|项目)[是为:：]?([\u4e00-\u9fa5A-Za-z0-9]{1,8})/);
+  DB.finance.unshift({id:uid(),type:type,amount:amt,cat:cat?cat[1]:(type==='in'?t('收入','Income','आय'):t('支出','Expense','खर्च')),note:text.slice(0,40),orderId:null,created:now()});
+  saveDB(); finalTranscript=''; document.getElementById('dictInput').value=''; editingId=null;
+  closeDictate(); renderAll();
+  toast(t('已记账 · '+(type==='in'?'收入':'支出'),'Booked · '+(type==='in'?'income':'expense'),'बही · '+(type==='in'?'आय':'खर्च')));
+}
+/* 语音知识 → 知识库（AI 提炼三条 + 同义标签） */
+function autoKBFromVoice(text){
+  const ex=extractKB(text);
+  const syn=genSynonyms(ex.keyword);
+  DB.kb.unshift({id:uid(),title:ex.keyword,keyword:ex.keyword,steps:ex.steps,usage:ex.usage,synonyms:syn,created:now()});
+  saveDB(); finalTranscript=''; document.getElementById('dictInput').value=''; editingId=null;
+  closeDictate(); renderAll();
+  toast(t('已入知识库 · AI 提炼三条','Saved to KB','ज्ञान में'));
+}
+function pushRemindersFromText(text, cat){
+  // 简单拆：含"明天/下周/周X/月底"等时间词的句子 → 待办
+  const parts=text.split(/[。.!?！？\n]/).map(s=>s.trim()).filter(Boolean);
+  const timeRe=/明天|后天|下周|周[一二三四五六日天]|月底|月初|今天|后天|\d+月\d+日|\d+:\d+|上午|下午|晚上/;
+  parts.forEach(p=>{
+    if(timeRe.test(p) && p.length>3){
+      const m=p.match(/(\d+月\d+日|\d+:\d+|明天|后天|下周|周[一二三四五六日天]|月底|今天)/);
+      DB.reminders.unshift({id:uid(),text:p,time:m?m[1]:'',duration:'',source:t('语音','Voice','वॉयस'),done:false,created:now()});
     }
   });
-  function clearDict(){
-    finalTranscript='';
-    document.getElementById('dictInput').value='';
-    editingId=null;
-  }
-  // —— 语音笔记：保存 / 编辑 / 删除 / 智能归类到板块 ——
-  let editingId=null;
-  function uid(){return 'n'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+}
 
-  // 关键词智能归类（纯前端启发式；真正的 AI 语义分类需后端接入 LLM）
-  const CATS={
-    reminders:['提醒','待办','记得','别忘了','明天','今天','几点','安排','计划','回访','跟进','物流','签收','确认','预约','会议','截止','到期','发','买','做','去','याद','कल','आज','मीटिंग',
-      'remind','todo','remember','tomorrow','today','schedule','follow','meeting','deadline','appointment','buy','send','call'],
-    projects:['客户','报价','样品','寄样','谈价','订单','采购','印度','中国','批发','银饰','手链','手机壳','合同','发票','发货','工厂','供应商','项目','对接','raj','delhi','王姐',
-      'client','customer','quote','quotation','sample','order','purchase','supplier','factory','invoice','contract','ship','shipping','deal','project','india','china','mumbai','ग्राहक','ऑर्डर','भाव','सैंपल','भारत'],
-    kb:['书','知识','培训','学','笔记','说明书','视频','怎么用','读','看','课程','资料','学到','整理','收藏','किताब','सीख','नोट','वीडियो','ट्रेनिंग',
-      'book','learn','learning','course','training','manual','note','study','read','watched','video','knowledge'],
-    finance:['钱','收入','支出','账','付款','收到','费用','赚','花','成本','利润','收款','货款','定金','尾款','工资','报销','卢比','人民币','美元','汇率','पैसा','रुपया','आय','खर्च','भुगतान',
-      'money','income','cost','expense','paid','pay','received','payment','profit','salary','invoice','rupee','rmb','usd','rate','fee'],
-    review:['复盘','总结','反思','周报','月报','年报','本周','本月','今年','做得好','改进','经验','समीक्षा','सारांश','साप्ताहिक','मासिक',
-      'review','weekly','monthly','yearly','summary','reflect','retrospective']
-  };
-  const CAT_NAME={reminders:'提醒',projects:'项目',kb:'知识库',finance:'记账',review:'复盘',inbox:'速记'};
-  const CAT_ORDER=['reminders','projects','finance','kb','review'];
-  function categorize(text){
-    const s=' '+(text||'').toLowerCase()+' ';
-    let best='inbox',bestN=0;
-    CAT_ORDER.forEach(cat=>{
-      let n=0;
-      (CATS[cat]||[]).forEach(k=>{ if(s.includes(k.toLowerCase())) n++; });
-      if(n>bestN){bestN=n;best=cat;}
-    });
-    return best;
+/* ============ 订单结构化解析 ============ */
+function parseOrder(text){
+  const o={id:uid(),date:todayStr(),clientName:'',goods:'',qty:'',unitPrice:'',total:'',delivery:'',deposit:'',balance:'',balanceDue:'',logistics:'',customs:'',remark:'',followups:[]};
+  // 客户名：前几个字含"客户/先生/女士/总"或英文名
+  let name=text.match(/([A-Za-z]+|[\u4e00-\u9fa5]{1,4}(?:客户|先生|女士|总|哥|姐))/);
+  o.clientName=name?name[1]:'';
+  // 货品
+  const g=text.match(/(?:货品|商品|买|订|产品|品名)[是为:：]?([\u4e00-\u9fa5A-Za-z0-9 ]{1,12})/); if(g) o.goods=g[1].trim();
+  // 数量
+  const q=text.match(/(\d+)\s*(?:件|条|个|套|只|箱|pcs|pieces)/i); if(q) o.qty=q[1];
+  // 金额（优先匹配金额类关键词 / 货币符号 / 单位，避免误取数量数字）
+  let am=text.match(/(?:金额|总价|总额|合计|款项)[是为:：]?\s*[¥￥$]?\s*(\d[\d,]*\.?\d*)/i);
+  if(!am) am=text.match(/[¥￥$]\s*(\d[\d,]*\.?\d*)/);
+  if(!am) am=text.match(/(\d[\d,]*\.?\d*)\s*(?:元|人民币|rmb|usd|美元|美金)/i);
+  if(!am) am=text.match(/(?:共|合计)[是为:：]?\s*(\d[\d,]*\.?\d*)/);
+  if(!am) am=text.match(/(\d[\d,]*\.?\d*)/);
+  if(am) o.total=am[1];
+  // 单价
+  const up=text.match(/(?:单价|单件|每件|每pcs|每piece)[是为:：]?\s*([¥￥$]?\s*\d[\d,]*\.?\d*)/i); if(up) o.unitPrice=up[1].replace(/[¥￥$]\s*/,'');
+  // 金额与数量齐全时自动推导单价
+  if(!o.unitPrice && o.total && o.qty){
+    const tt=parseFloat(String(o.total).replace(/,/g,'')); const qq=parseFloat(o.qty);
+    if(tt>0 && qq>0) o.unitPrice=(Math.round(tt/qq*100)/100).toString();
   }
-  function loadNotes(){
-    let notes=[];
-    try{notes=JSON.parse(localStorage.getItem('wb_notes')||'[]');}catch(_){notes=[];}
-    let changed=false;
-    notes=notes.map(n=>{
-      n=n||{};
-      if(!n.id){n.id=uid();changed=true;}
-      if(!n.cat){n.cat=categorize(n.text||'');changed=true;}
-      return n;
-    });
-    if(changed){try{localStorage.setItem('wb_notes',JSON.stringify(notes));}catch(_){}}
-    return notes;
-  }
-  function saveNotes(notes){try{localStorage.setItem('wb_notes',JSON.stringify(notes.slice(0,50)));}catch(_){}}
-  function saveDict(){
-    const ta=document.getElementById('dictInput');
-    const text=ta.value.trim();
-    if(!text){toast('文字为空');return;}
-    let notes=loadNotes(),savedCat;
-    if(editingId){
-      const i=notes.findIndex(n=>n.id===editingId);
-      if(i>=0){notes[i].text=text;notes[i].cat=categorize(text);notes[i].t=new Date().toLocaleString();savedCat=notes[i].cat;}
-      editingId=null;
-    }else{
-      const note={id:uid(),t:new Date().toLocaleString(),text:text,cat:categorize(text)};
-      notes.unshift(note); savedCat=note.cat;
+  // 交货日
+  const d=text.match(/(?:交货|交付|发货|到货)[是为:：]?(\d+月\d+日|\d+天|\d+周|下周|月底)/); if(d) o.delivery=d[1];
+  // 预付/定金
+  const dep=text.match(/(?:预付|定金|订金)[是为:：]?([¥￥$]?\s*\d[\d,]*)/); if(dep) o.deposit=dep[1].replace(/[¥￥$]\s*/,'');
+  // 尾款
+  const bal=text.match(/(?:尾款|余款|结清)[是为:：]?([¥￥$]?\s*\d[\d,]*)/); if(bal) o.balance=bal[1].replace(/[¥￥$]\s*/,'');
+  const bd=text.match(/(?:尾款截止|尾款于|余款截止)[是为:：]?(\d+月\d+日|\d+天)/); if(bd) o.balanceDue=bd[1];
+  // 物流
+  const lg=text.match(/(?:物流|快递|发货方式|运输)[是为:：]?([\u4e00-\u9fa5A-Za-z0-9 ]{1,10})/); if(lg) o.logistics=lg[1].trim();
+  // 报关/清关
+  const cs=text.match(/(?:报关|清关|关税)[是为:：]?([\u4e00-\u9fa5A-Za-z0-9 ]{1,10})/); if(cs) o.customs=cs[1].trim();
+  // 备注
+  const rm=text.match(/(?:备注|特别|注意|说明)[是为:：]?([\u4e00-\u9fa5A-Za-z0-9 ，,。.]{1,20})/); if(rm) o.remark=rm[1].trim();
+  o.followups=[
+    {label:t('定金核对','Deposit check','अग्रिम चेक'),done:false,due:o.balanceDue||''},
+    {label:t('备货跟进','Prepare stock','स्टॉक तैयार'),done:false,due:o.delivery||''},
+    {label:t('尾款催收','Balance chase','बाकी वसूली'),done:false,due:o.balanceDue||''}
+  ];
+  return o;
+}
+
+/* ============ 渲染：首页 ============ */
+function statCards(){
+  const clients=DB.clients.length;
+  const orders=DB.clients.reduce((s,c)=>s+(c.orders?c.orders.length:0),0);
+  const income=DB.finance.filter(f=>f.type==='in').reduce((s,f)=>s+(+f.amount||0),0);
+  const expense=DB.finance.filter(f=>f.type==='out').reduce((s,f)=>s+(+f.amount||0),0);
+  const profit=income-expense;
+  const kc=DB.kb.length;
+  const todo=DB.reminders.filter(r=>!r.done).length;
+  return [
+    {ico:'⏰',lbl:t('提醒','Reminders','रिमाइंडर'),val:todo,t:t('待办待处理','open todos','बाकी काम'),go:'reminders'},
+    {ico:'📁',lbl:t('项目/客户','Projects','प्रोजेक्ट'),val:clients,t:t(orders+' 笔订单',orders+' orders',orders+' ऑर्डर'),go:'projects'},
+    {ico:'📚',lbl:t('知识库','Knowledge','ज्ञान'),val:kc,t:t('条方案','tips','टिप्स'),go:'kb'},
+    {ico:'💰',lbl:t('记账','Money','पैसा'),val:'¥'+fmt(profit),t:t('净利润','net profit','शुद्ध'),go:'finance'},
+    {ico:'🔄',lbl:t('自动','Daily','डेली'),val:'3',t:t('套定时 + 打卡','auto + check','ऑटो'),go:'auto'},
+    {ico:'📊',lbl:t('复盘','Review','समीक्षा'),val:t('周/月/年','W/M/Y','स/म/व'),t:t('自动汇总','auto','ऑटो'),go:'review'}
+  ];
+}
+function fmt(n){ return (Math.round(n*100)/100).toLocaleString(); }
+function renderOverview(){
+  const wrap=document.getElementById('overviewCards');
+  wrap.innerHTML=statCards().map(c=>'<div class="card" onclick="goTo(\''+c.go+'\')"><div class="bigico">'+c.ico+'</div><div class="lbl">'+c.lbl+'</div><div class="val">'+c.val+'</div><div class="meta">'+c.t+'</div></div>').join('');
+  renderVoiceBox('inbox');
+}
+function renderVoiceBox(cat){
+  const box=document.getElementById('voiceBox-'+cat); if(!box) return;
+  const items=DB.notes.filter(n=>n.cat===cat);
+  if(!items.length){box.innerHTML='';return;}
+  box.innerHTML='<div class="sec-title">🎙 <span class="zh-text">语音添加</span><span class="en-text">From voice</span><span class="hi-text">वॉयस से</span></div>'+items.map(n=>voiceNoteHTML(n)).join('');
+}
+function voiceNoteHTML(n){
+  return '<div class="voice-note">'+esc(n.text)+'<div class="vm"><span>'+esc(n.t)+' · '+CAT_NAME[n.cat]+'</span><span class="acts"><button onclick="editNote(\''+n.id+'\')">✎</button><button onclick="delNote(\''+n.id+'\')">×</button></span></div></div>';
+}
+function editNote(id){
+  const n=DB.notes.find(x=>x.id===id); if(!n) return; editingId=id;
+  const ta=document.getElementById('dictInput'); ta.value=n.text;
+  document.getElementById('dictate').classList.add('open'); document.getElementById('micBtn').classList.add('recording');
+  document.getElementById('dictState').innerHTML='<span class="dot"></span> <span class="zh-text">修改中…保存即更新</span><span class="en-text">Editing… save to update</span><span class="hi-text">बदल रहे… सहेजें</span>';
+  ta.focus();
+}
+function delNote(id){ DB.notes=DB.notes.filter(n=>n.id!==id); saveDB(); renderAll(); toast(t('已删除','Deleted','हटाया')); }
+
+/* ============ 渲染：提醒 ============ */
+function renderReminders(){
+  const list=document.getElementById('reminderList');
+  const items=DB.reminders.slice().sort((a,b)=>(a.done?1:0)-(b.done?1:0));
+  if(!items.length){list.innerHTML='<div class="empty">'+t('暂无提醒。语音或手动添加待办。','No reminders yet.','कोई रिमाइंडर नहीं।')+'</div>';return;}
+  list.innerHTML=items.map(r=>'<div class="titem'+(r.done?' done':'')+'">'+
+    '<div class="chk'+(r.done?' done':'')+'" onclick="toggleReminder(\''+r.id+'\')">'+(r.done?'✓':'')+'</div>'+
+    '<div class="body"><div class="ti">'+esc(r.text)+'</div>'+(r.time?'<div class="me">'+esc(r.time)+(r.duration?' · '+esc(r.duration):'')+'</div>':'')+'</div>'+
+    (r.source?'<span class="src">'+esc(r.source)+'</span>':'')+
+    '<div class="acts"><button onclick="delReminder(\''+r.id+'\')">×</button></div></div>').join('');
+}
+function toggleReminder(id){ const r=DB.reminders.find(x=>x.id===id); if(r){r.done=!r.done; saveDB(); renderReminders(); renderOverview();} }
+function delReminder(id){ DB.reminders=DB.reminders.filter(r=>r.id!==id); saveDB(); renderReminders(); renderOverview(); }
+function openReminderModal(){
+  modalHTML(t('添加提醒','Add reminder','रिमाइंडर जोड़ें'),
+    '<div class="field"><label>'+t('事项内容','What','क्या')+'</label><input id="rmText"></div>'+
+    '<div class="field"><label>'+t('时间节点','Time','समय')+'</label><input id="rmTime" placeholder="如 明天 09:00 / 周五"></div>'+
+    '<div class="field"><label>'+t('预估时长','Duration','अवधि')+'</label><input id="rmDur" placeholder="如 30 分钟"></div>'+
+    '<button class="btn accent" style="width:100%" onclick="saveReminder()">'+t('保存','Save','सहेजें')+'</button>');
+}
+function saveReminder(){
+  const text=document.getElementById('rmText').value.trim();
+  if(!text){toast(t('请填写内容','Fill content','भरें'));return;}
+  DB.reminders.unshift({id:uid(),text:text,time:document.getElementById('rmTime').value.trim(),duration:document.getElementById('rmDur').value.trim(),source:t('手动','Manual','मैनुअल'),done:false,created:now()});
+  saveDB(); closeModal(); renderReminders(); renderOverview(); toast(t('已添加','Added','जोड़ा'));
+}
+
+/* ============ 渲染：自动 ============ */
+function autoDefs(){
+  return [
+    {num:1,title:t('客户归档 + 每日双回访','Client archive + 2x follow-up','ग्राहक आर्काइव + फॉलो-अप'),when:t('21:00 / 09:00','21:00 / 09:00','21:00 / 09:00'),
+     steps:[t('每晚 21:00：检测今日未归档客户聊天，推送语音口述归档，AI 自动结构化存入客户档案、拆分待办、标记截止','Nightly 21:00: detect unarchived chats, prompt voice archive, AI structures into client file + todos','रात 21:00: चैट चेक, वॉयस आर्काइव'),
+            t('每日 09:00：自动筛选 7 天未回访客户，推送双语回访话术 + 跟进清单','Daily 09:00: pick clients not followed in 7d, push bilingual script + checklist','सुबह 09:00: 7 दिन बिना फॉलो-अप वालों को लिस्ट')]},
+    {num:2,title:t('每周库存复盘','Weekly inventory review','साप्ताहिक स्टॉक रिव्यू'),when:t('周一晚','Mon PM','सोमवार शाम'),
+     steps:[t('自动生成：库存进度、现存问题、优化方案','Auto: stock progress, issues, fixes','ऑटो: स्टॉक, समस्या, सुधार'),t('自动归档知识库 + 推送提醒','Auto-archive to KB + push reminder','KB में सहेजें + याद')]},
+    {num:3,title:t('每日自媒体热点采集','Daily trending采集','रोज़ ट्रेंड'),when:t('08:00','08:00','08:00'),
+     steps:[t('自动抓取：国内 小红书/抖音/微博 热点 + 印度 YouTube/Ins 热点','Fetch CN RED/Douyin/Weibo + IN YouTube/IG','चीन + भारत ट्रेंड'),t('每日输出：10 条国内选题 + 5 条印度二创，两套分开归档','Output: 10 CN topics + 5 IN ideas, filed separately','10 चीन + 5 भारत')]}
+  ];
+}
+function renderAuto(){
+  const AUTOS=autoDefs();
+  document.getElementById('autoList').innerHTML=AUTOS.map(a=>'<div class="auto-card"><div class="ah"><span class="num">'+a.num+'</span><span class="at">'+a.title+'</span><span class="when">'+a.when+'</span></div><div class="ab">'+(LANG==='en'?t('行为','Behavior','व्यवहार'):LANG==='hi'?t('行为','व्यवहार','व्यवहार'):'行为')+'</div>'+
+    a.steps.map((s,i)=>'<div class="step"><span class="s">'+(i+1)+'.</span><span>'+s+'</span></div>').join('')+'</div>').join('');
+  // 打卡
+  const c=DB.checkin; if(c.date!==todayStr()){c.date=todayStr();c.read=c.exercise=c.podcast=false;saveDB();}
+  const items=[{k:'read',i:'📖',l:t('读书','Read','पढ़ें'),on:c.read},{k:'exercise',i:'🏃',l:t('运动','Exercise','व्यायाम'),on:c.exercise},{k:'podcast',i:'🎧',l:t('播客','Podcast','पॉडकास्ट'),on:c.podcast}];
+  document.getElementById('checkinList').innerHTML=items.map(it=>'<div class="check'+(it.on?' on':'')+'" onclick="toggleCheck(\''+it.k+'\')"><span class="ci">'+it.i+'</span><span class="cl">'+it.l+'</span><span class="box">'+(it.on?'✓':'')+'</span></div>').join('');
+}
+function toggleCheck(k){ DB.checkin[k]=!DB.checkin[k]; saveDB(); renderAuto(); }
+
+/* ============ 趋势（示例） ============ */
+const TRENDING={
+  cn:['印度婚礼到底花多少钱？50 lakh 起','印度人有多爱银饰','中国药企在印度采购指南 2026','从义乌到孟买：跨境物流全流程','印度手机壳在淘宝爆卖','中国香料在印度爆火','印度客户最爱买的 5 样中国货','跨境贸易避坑：清关资料清单','银饰直播话术 3 秒钩子','印度节日选品日历 2026'],
+  in:['Indian wedding jewelry haul 2026','Mehndi design ideas 2026','Sabyasachi bridal look India','Budget Indian wedding decor','Desi fusion outfit ideas']
+};
+let trendP='cn';
+function renderTrends(){
+  const arr=(TRENDING[trendP]||[]).slice();
+  document.getElementById('trendList').innerHTML=arr.map((tt,i)=>'<div class="trend-item"><div class="tr"><span class="ptag">'+(trendP==='cn'?t('国内','CN','चीन'):t('印度','IN','भारत'))+'</span><span class="tt">'+esc(tt)+'</span><span class="th">'+(trendP==='cn'?'🔥 选题 '+(i+1):'💡 二创 '+(i+1))+'</span></div></div>').join('');
+}
+function refreshTrends(){ renderTrends(); }
+document.querySelectorAll('#trendTabs button').forEach(b=>b.addEventListener('click',function(){ document.querySelectorAll('#trendTabs button').forEach(x=>x.classList.remove('on')); this.classList.add('on'); trendP=this.dataset.p; renderTrends(); }));
+
+/* ============ 渲染：项目 ============ */
+let openClients=null;
+function toggleClient(cid){ if(openClients===null)openClients=new Set(DB.clients.map(c=>c.id)); if(openClients.has(cid))openClients.delete(cid);else openClients.add(cid); renderProjects(); }
+function renderProjects(){
+  const wrap=document.getElementById('clientList');
+  if(!DB.clients.length){wrap.innerHTML='<div class="empty">'+t('暂无客户。点「新增客户」，或点底部🎙 麦克风口述订单自动入台账。','No clients yet.','कोई ग्राहक नहीं।')+'</div>';return;}
+  if(openClients===null) openClients=new Set(DB.clients.map(c=>c.id));
+  wrap.innerHTML=DB.clients.map(c=>{
+    const ords=c.orders||[];
+    const open=openClients.has(c.id);
+    const rows=ords.map(o=>orderRowHTML(o)).join('')||'<div class="empty" style="margin-top:8px">'+t('暂无订单','No orders','कोई ऑर्डर नहीं')+'</div>';
+    return '<div class="client'+(open?' open':'')+'">'+
+      '<div class="ch" onclick="toggleClient(\''+c.id+'\')">'+
+        '<div class="ava">👤</div>'+
+        '<div style="flex:1"><div class="cn">'+esc(c.name)+'</div><div class="cm">'+ords.length+' '+t('笔订单','orders','ऑर्डर')+(c.note?' · '+esc(c.note):'')+'</div></div>'+
+        '<div class="cacts" onclick="event.stopPropagation()">'+
+          '<button onclick="addOrder(\''+c.id+'\')">+'+t('订单','Order','ऑर्डर')+'</button>'+
+          '<button onclick="editClient(\''+c.id+'\')">'+t('改','Edit','बदलें')+'</button>'+
+          '<button onclick="delClient(\''+c.id+'\')">'+t('删','Del','हटाएं')+'</button>'+
+        '</div>'+
+        '<span class="chev">'+(open?'▾':'▸')+'</span>'+
+      '</div>'+
+      '<div class="sub">'+(open?rows:'')+'</div>'+
+      '</div>';
+  }).join('');
+}
+/* 二级：订单简要行（下单日期 / 货品 / 总金额）→ 点进详情 */
+function orderRowHTML(o){
+  const st=o.payStatus||'';
+  return '<div class="orow" onclick="openOrderDetail(\''+o.id+'\')">'+
+    '<span class="od">'+esc(o.date||'—')+'</span>'+
+    '<span class="og">'+(o.goods?esc(o.goods):t('未填货品','—','—'))+(o.qty?' ×'+esc(o.qty):'')+'</span>'+
+    '<span class="ot">'+(o.total?esc(o.total):'—')+'</span>'+
+    (st?'<span class="pill '+(st==='done'?'ok':st==='warn'?'warn':'')+'">'+esc(st==='done'?t('已结清','Paid','चुका'):st==='warn'?t('待跟进','Pending','बाकी'):st)+'</span>':'')+
+    '</div>';
+}
+/* 三级：订单详情（全套字段分栏展示） */
+function openOrderDetail(oid){
+  let o=null;
+  DB.clients.forEach(c=>{(c.orders||[]).forEach(x=>{ if(x.id===oid) o=x; });});
+  if(!o){ toast(t('订单不存在','Order gone','गायब')); return; }
+  const sec=(tt,inner)=>'<div class="odsec"><div class="odsh">'+tt+'</div>'+inner+'</div>';
+  const base='<div class="ogrid">'+
+    fld(t('客户名称','Client','ग्राहक'),o.clientName)+fld(t('下单日期','Date','तारीख'),o.date)+
+    fld(t('货品名称','Goods','माल'),o.goods)+fld(t('采购数量','Qty','संख्या'),o.qty)+
+    fld(t('单品单价','Unit price','यूनिट'),o.unitPrice)+fld(t('订单总金额','Total','कुल'),o.total)+
+    fld(t('约定交货日期','Delivery','डिलीवरी'),o.delivery)+fld(t('预付定金金额','Deposit','अग्रिम'),o.deposit)+
+    fld(t('剩余尾款金额','Balance','बाकी'),o.balance)+fld(t('尾款结算截止日期','Due','देय'),o.balanceDue)+
+    '</div>';
+  const foll='<div class="follows" style="margin-top:2px">'+o.followups.map(f=>'<div class="follow'+(f.done?' done':'')+'" onclick="toggleFollow(\''+o.id+'\',\''+f.label+'\')"><span class="dot"></span>'+esc(f.label)+(f.due?' <span class="fd">'+esc(f.due)+'</span>':'')+'</div>').join('')+'</div>';
+  modalHTML(t('订单详情','Order detail','ऑर्डर विवरण'),
+    sec(t('基本信息','Basic','मूल'),base)+
+    sec(t('物流信息','Logistics','लॉजिस्टिक्स'),'<div class="ogrid">'+fld(t('物流信息','Logistics','लॉजिस्टिक्स'),o.logistics)+'</div>')+
+    sec(t('报关单据要求','Customs docs','कस्टम'),'<div class="ogrid">'+fld(t('报关单据','Customs','कस्टम'),o.customs)+'</div>')+
+    sec(t('客户特殊备注','Special note','विशेष'),'<div class="ogrid">'+fld(t('备注','Note','नोट'),o.remark)+'</div>')+
+    sec(t('跟进节点','Follow-ups','फॉलो'),foll)+
+    '<button class="btn accent" style="width:100%" onclick="closeModal();editOrder(\''+o.id+'\')">'+t('编辑订单','Edit order','बदलें')+'</button>');
+}
+function fld(k,v){ return '<div><span class="k">'+k+'</span><span class="v">'+(esc(v)||'—')+'</span></div>'; }
+function toggleFollow(oid,label){ const c=DB.clients.find(x=>x.orders&&x.orders.find(o=>o.id===oid)); if(!c)return; const o=c.orders.find(o=>o.id===oid); const f=o.followups.find(f=>f.label===label); if(f){f.done=!f.done; saveDB(); renderProjects(); openOrderDetail(oid);} }
+function openClientModal(id){
+  let c=id?DB.clients.find(x=>x.id===id):null;
+  modalHTML(t('客户','Client','ग्राहक')+(id?' · '+t('修改','edit','बदलें'):''),
+    '<div class="field"><label>'+t('客户名','Name','नाम')+'</label><input id="clName" value="'+(c?esc(c.name):'')+'"></div>'+
+    '<div class="field"><label>'+t('备注','Note','नोट')+'</label><input id="clNote" value="'+(c?esc(c.note||''):'')+'"></div>'+
+    '<button class="btn accent" style="width:100%" onclick="saveClient(\''+(id||'')+'\')">'+t('保存','Save','सहेजें')+'</button>');
+}
+function saveClient(id){
+  const name=document.getElementById('clName').value.trim(); if(!name){toast(t('请填客户名','Name?','नाम?'));return;}
+  if(id){ const c=DB.clients.find(x=>x.id===id); if(c){c.name=name;c.note=document.getElementById('clNote').value.trim();} }
+  else DB.clients.unshift({id:uid(),name:name,note:document.getElementById('clNote').value.trim(),orders:[]});
+  saveDB(); closeModal(); renderProjects(); renderOverview(); toast(t('已保存','Saved','सहेजा'));
+}
+function editClient(id){ openClientModal(id); }
+function delClient(id){ if(!confirm(t('删除该客户及其订单？','Delete client & orders?','ग्राहक हटाएं?'))){return;} DB.clients=DB.clients.filter(c=>c.id!==id); saveDB(); renderProjects(); renderOverview(); }
+function addOrder(cid){ toggleDictate(); toast(t('对着麦克风口述订单，AI 自动结构化','Dictate the order, AI structures it','वॉयस से ऑर्डर')); }
+let pendingOrderRaw='';
+function openOrderConfirm(o, raw){
+  pendingOrderRaw=(typeof raw==='string')?raw:'';
+  const f=(k,v)=>'<div class="field"><label>'+k+'</label><input id="of_'+v+'" value="'+esc(o[v]||'')+'"></div>';
+  // 分段口述合并：同客户已有订单时给出「保存方式」选择；无货品片段默认合并到最近订单
+  const ec=DB.clients.find(x=>x.name===o.clientName);
+  const existing=ec?(ec.orders||[]):[];
+  const defaultMerge=(!o.goods && existing.length)?existing[0].id:'';
+  const mergeSel=existing.length?
+    '<div class="field"><label>'+t('保存方式','Save as','मोड')+'</label>'+
+    '<select id="of_mergeTarget">'+
+    '<option value="">'+t('＋ 存为新订单','＋ New order','＋ नया ऑर्डर')+'</option>'+
+    existing.map(x=>'<option value="'+x.id+'"'+(x.id===defaultMerge?' selected':'')+'>'+t('⇄ 合并到','⇄ Merge into','⇄ मर्ज')+' '+esc(x.goods||x.id.slice(-4))+'</option>').join('')+
+    '</select></div>':
+    '<input type="hidden" id="of_mergeTarget" value="">';
+  modalHTML(t('确认订单','Confirm order','ऑर्डर चेक'),
+    '<div class="hint" style="margin-bottom:10px">'+t('AI 已结构化，可手动修改后保存；同一客户多次口述可自动合并回填（仅补空缺、不覆盖）','AI structured — edit & save; repeat dictation auto-merges into same client order','AI — बदलें; दोहरा वॉयस ऑटो-मर्ज')+'</div>'+
+    mergeSel+
+    f(t('客户名称','Client','ग्राहक'),'client')+f(t('下单日期','Date','तारीख'),'date')+
+    f(t('采购货品','Goods','माल'),'goods')+f(t('采购数量','Qty','संख्या'),'qty')+
+    f(t('单品单价','Unit price','यूनिट'),'unitPrice')+f(t('订单总金额','Total','कुल'),'total')+
+    f(t('约定交货日期','Delivery','डिलीवरी'),'delivery')+f(t('预付定金金额','Deposit','अग्रिम'),'deposit')+
+    f(t('剩余尾款金额','Balance','बाकी'),'balance')+f(t('尾款结算截止日期','Due','देय'),'balanceDue')+
+    f(t('物流','Logistics','लॉजिस्टिक्स'),'logistics')+f(t('报关','Customs','कस्टम'),'customs')+f(t('客户特殊备注','Note','नोट'),'remark')+
+    '<button class="btn accent" style="width:100%" onclick="commitOrder(\''+o.id+'\')">'+t('保存订单','Save order','सहेजें')+'</button>');
+  editingOrderId=o.id;
+}
+let editingOrderId=null;
+function commitOrder(oid,raw){
+  raw=(typeof raw==='string'&&raw)?raw:pendingOrderRaw;
+  const get=v=>document.getElementById('of_'+v).value.trim();
+  const clientName=get('client')||t('未命名客户','Unnamed','बिना नाम');
+  let c=DB.clients.find(x=>x.name===clientName);
+  if(!c){ c={id:uid(),name:clientName,note:'',orders:[]}; DB.clients.unshift(c); }
+  // 合并到已有订单：仅回填空缺字段，不覆盖原有数据
+  const mergeId=get('mergeTarget');
+  if(mergeId){
+    const eo=c.orders.find(o=>o.id===mergeId);
+    if(eo){
+      ['goods','qty','unitPrice','total','delivery','deposit','balance','balanceDue','logistics','customs','remark'].forEach(k=>{
+        const nv=get(k); if(nv && !eo[k]) eo[k]=nv;
+      });
+      eo.clientName=clientName;
+      if(eo.followups[0] && get('balanceDue') && !eo.followups[0].due) eo.followups[0].due=get('balanceDue');
+      if(eo.followups[1] && get('delivery') && !eo.followups[1].due) eo.followups[1].due=get('delivery');
+      if(eo.followups[2] && get('balanceDue') && !eo.followups[2].due) eo.followups[2].due=get('balanceDue');
+      DB.notes.unshift({id:uid(),t:now(),text:raw,cat:'projects'});
+      saveDB(); closeModal(); closeDictate(); finalTranscript=''; document.getElementById('dictInput').value='';
+      renderProjects(); renderOverview(); renderReminders();
+      toast(t('已合并到已有订单 · 仅补全空缺字段','Merged · filled blanks only','मर्ज हुआ'));
+      return;
     }
-    saveNotes(notes);
-    finalTranscript=''; ta.value='';
-    document.getElementById('dictate').classList.remove('open');
-    document.getElementById('micBtn').classList.remove('recording');
-    renderNotes(); renderVoice();
-    toast('已保存 · 归入「'+CAT_NAME[savedCat]+'」');
   }
-  function editNote(id){
-    const n=loadNotes().find(x=>x.id===id); if(!n) return;
-    editingId=id;
-    const ta=document.getElementById('dictInput');
-    ta.value=n.text;
-    document.getElementById('dictate').classList.add('open');
-    document.getElementById('micBtn').classList.add('recording');
-    document.getElementById('dictState').innerHTML='<span class="dot"></span> <span class="zh-text">修改中…保存即更新</span><span class="en-text">Editing… save to update</span><span class="hi-text">बदल रहे… सहेजें</span>';
-    ta.focus();
+  const order={id:oid,date:get('date')||todayStr(),clientName:clientName,goods:get('goods'),qty:get('qty'),unitPrice:get('unitPrice'),total:get('total'),delivery:get('delivery'),deposit:get('deposit'),balance:get('balance'),balanceDue:get('balanceDue'),logistics:get('logistics'),customs:get('customs'),remark:get('remark'),
+    followups:[{label:t('定金核对','Deposit check','अग्रिम चेक'),done:!!get('deposit'),due:get('balanceDue')},{label:t('备货跟进','Prepare stock','स्टॉक तैयार'),done:false,due:get('delivery')},{label:t('尾款催收','Balance chase','बाकी वसूली'),done:false,due:get('balanceDue')}]};
+  c.orders.unshift(order);
+  // 同步：语音笔记 + 提醒（三大节点）
+  DB.notes.unshift({id:uid(),t:now(),text:raw,cat:'projects'});
+  ['定金核对','备货跟进','尾款催收'].forEach(l=>{
+    const fu=order.followups.find(f=>f.label===l);
+    DB.reminders.unshift({id:uid(),text:clientName+' · '+l+(order.goods?'（'+order.goods+'）':''),time:fu?fu.due:'',duration:'',source:t('订单跟进','Order','ऑर्डर'),done:false,created:now()});
+  });
+  // 记账：预付入账
+  if(get('deposit')) DB.finance.unshift({id:uid(),type:'in',amount:get('deposit'),cat:t('预付','Deposit','अग्रिम'),note:clientName+(order.goods?' · '+order.goods:''),orderId:oid,created:now()});
+  saveDB(); closeModal(); closeDictate(); finalTranscript=''; document.getElementById('dictInput').value='';
+  renderProjects(); renderOverview(); renderReminders();
+  toast(t('订单已存 · 3 个跟进节点已推提醒','Order saved · 3 follow-ups pushed','ऑर्डर सहेजा · 3 याद'));
+}
+/* 编辑订单：就地更新，不重复生成跟进/记账 */
+function editOrder(oid){
+  let found=null;
+  DB.clients.forEach(c=>{(c.orders||[]).forEach(o=>{ if(o.id===oid) found=o; });});
+  if(!found){ toast(t('订单不存在','Order gone','गायब')); return; }
+  const o=Object.assign({},found);
+  const f=(k,v)=>'<div class="field"><label>'+k+'</label><input id="of_'+v+'" value="'+esc(o[v]||'')+'"></div>';
+  modalHTML(t('编辑订单','Edit order','ऑर्डर बदलें'),
+    f(t('客户名称','Client','ग्राहक'),'client')+f(t('下单日期','Date','तारीख'),'date')+
+    f(t('采购货品','Goods','माल'),'goods')+f(t('采购数量','Qty','संख्या'),'qty')+
+    f(t('单品单价','Unit price','यूनिट'),'unitPrice')+f(t('订单总金额','Total','कुल'),'total')+
+    f(t('约定交货日期','Delivery','डिलीवरी'),'delivery')+f(t('预付定金金额','Deposit','अग्रिम'),'deposit')+
+    f(t('剩余尾款金额','Balance','बाकी'),'balance')+f(t('尾款结算截止日期','Due','देय'),'balanceDue')+
+    f(t('物流','Logistics','लॉजिस्टिक्स'),'logistics')+f(t('报关','Customs','कस्टम'),'customs')+f(t('客户特殊备注','Note','नोट'),'remark')+
+    '<button class="btn accent" style="width:100%" onclick="commitOrderEdit(\''+oid+'\')">'+t('保存修改','Save','सहेजें')+'</button>');
+}
+function commitOrderEdit(oid){
+  const get=v=>document.getElementById('of_'+v).value.trim();
+  const clientName=get('client')||t('未命名客户','Unnamed','बिना नाम');
+  const ec=DB.clients.find(x=>(x.orders||[]).find(o=>o.id===oid));
+  const eo=ec&&ec.orders.find(o=>o.id===oid);
+  if(!eo){ toast(t('订单不存在','Order gone','गायब')); return; }
+  const fields=['clientName','date','goods','qty','unitPrice','total','delivery','deposit','balance','balanceDue','logistics','customs','remark'];
+  fields.forEach(k=>eo[k]=get(k.replace('clientName','client')));
+  // 同步跟进节点日期
+  if(eo.followups[0]) eo.followups[0].due=get('balanceDue');
+  if(eo.followups[1]) eo.followups[1].due=get('delivery');
+  if(eo.followups[2]) eo.followups[2].due=get('balanceDue');
+  // 客户改名 → 移动订单到新客户
+  if(clientName!==ec.name){
+    ec.orders=ec.orders.filter(o=>o.id!==oid);
+    let c=DB.clients.find(x=>x.name===clientName);
+    if(!c){ c={id:uid(),name:clientName,note:'',orders:[]}; DB.clients.unshift(c); }
+    c.orders.unshift(eo);
   }
-  function delNote(id){
-    let notes=loadNotes().filter(n=>n.id!==id);
-    saveNotes(notes);
-    if(editingId===id){editingId=null;document.getElementById('dictInput').value='';document.getElementById('dictate').classList.remove('open');document.getElementById('micBtn').classList.remove('recording');}
-    renderNotes(); renderVoice();
-    toast('已删除');
-  }
-  function renderNotes(){
-    const box=document.getElementById('dictNotes');
-    const notes=loadNotes();
-    if(!notes.length){box.innerHTML='<div style="font-size:12px;color:var(--muted);padding:6px 0">—</div>';return;}
-    box.innerHTML=notes.map(n=>'<div class="dict-note">'+esc(n.text)
-      +'<div class="nt"><span class="cat-tag">'+CAT_NAME[n.cat]+'</span>'
-      +'<span class="acts"><button onclick="editNote(\''+n.id+'\')" title="编辑">✎</button><button onclick="delNote(\''+n.id+'\')" title="删除">×</button></span></div>'
-      +'<div class="nt" style="margin-top:2px">'+esc(n.t)+'</div></div>').join('');
-  }
-  function voiceItemHTML(n){
-    return '<div class="vitem"><div class="vtxt">'+esc(n.text)+'</div>'
-      +'<div class="vmeta"><span class="vtime">'+esc(n.t)+'</span>'
-      +'<span class="vact"><button onclick="editNote(\''+n.id+'\')" title="编辑">✎</button><button onclick="delNote(\''+n.id+'\')" title="删除">×</button></span></div></div>';
-  }
-  function renderVoice(){
-    const notes=loadNotes();
-    ['reminders','projects','kb','finance','review','inbox'].forEach(cat=>{
-      const box=document.getElementById('voiceBox-'+cat); if(!box) return;
-      const items=notes.filter(n=>n.cat===cat);
-      if(!items.length){box.innerHTML='';return;}
-      const head='<div class="sec-title">🎙 <span class="zh-text">语音添加</span><span class="en-text">From voice</span><span class="hi-text">वॉयस से</span></div>';
-      box.innerHTML=head+items.map(voiceItemHTML).join('');
-    });
-  }
-  let toastTimer=null;
-  function toast(msg){
-    let el=document.getElementById('toast');
-    if(!el){el=document.createElement('div');el.id='toast';el.className='toast';document.body.appendChild(el);}
-    el.textContent=msg; el.classList.add('show');
-    clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove('show'),1800);
-  }
-  function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
-  (function initDict(){
-    selectedLang=recLang();
-    document.querySelectorAll('.dict-lang button').forEach(b=>b.classList.toggle('on',b.getAttribute('data-l')===selectedLang));
-    renderNotes(); renderVoice();
-  })();
+  saveDB(); closeModal(); renderProjects(); renderOverview(); renderReminders();
+  toast(t('订单已更新','Order updated','ऑर्डर अपडेट'));
+}
 
-  // —— 爆款实时抓取（自动菜单） ——
-  const TRENDING={
-    all:[
-      {p:'douyin',t:'印度婚礼到底花多少钱？50 lakh 起',h:'🔥 820 万播放'},
-      {p:'douyin',t:'印度人有多爱银饰',h:'🔥 560 万播放'},
-      {p:'bili',t:'中国药企在印度的采购指南 2026',h:'🔥 145 万播放'},
-      {p:'bili',t:'从义乌到孟买：跨境物流全流程',h:'🔥 98 万播放'},
-      {p:'weibo',t:'印度手机壳在淘宝爆卖',h:'🔥 38 万讨论'},
-      {p:'weibo',t:'中国香料在印度爆火',h:'🔥 22 万讨论'},
-      {p:'ig',t:'Indian wedding jewelry haul 2026',h:'❤️ 220k likes'},
-      {p:'ig',t:'Mehndi design ideas 2026',h:'❤️ 180k likes'},
-      {p:'x',t:'India China trade tariff update',h:'💬 45k impressions'},
-      {p:'x',t:'Make in India vs China goods',h:'💬 38k impressions'}
-    ],
-    douyin:[
-      {p:'douyin',t:'印度婚礼到底花多少钱？50 lakh 起',h:'🔥 820 万播放'},
-      {p:'douyin',t:'印度人有多爱银饰',h:'🔥 560 万播放'},
-      {p:'douyin',t:'印度手机壳在中国爆卖',h:'🔥 410 万播放'}
-    ],
-    bili:[
-      {p:'bili',t:'中国药企在印度的采购指南 2026',h:'🔥 145 万播放'},
-      {p:'bili',t:'从义乌到孟买：跨境物流全流程',h:'🔥 98 万播放'},
-      {p:'bili',t:'印度婚礼采购清单详解',h:'🔥 76 万播放'}
-    ],
-    weibo:[
-      {p:'weibo',t:'印度手机壳在淘宝爆卖',h:'🔥 38 万讨论'},
-      {p:'weibo',t:'中国香料在印度爆火',h:'🔥 22 万讨论'},
-      {p:'weibo',t:'印度人最爱买的 5 样中国货',h:'🔥 19 万讨论'}
-    ],
-    ig:[
-      {p:'ig',t:'Indian wedding jewelry haul 2026',h:'❤️ 220k likes'},
-      {p:'ig',t:'Mehndi design ideas 2026',h:'❤️ 180k likes'},
-      {p:'ig',t:'Sabyasachi bridal look India',h:'❤️ 150k likes'}
-    ],
-    x:[
-      {p:'x',t:'India China trade tariff update',h:'💬 45k impressions'},
-      {p:'x',t:'Make in India vs China goods',h:'💬 38k impressions'},
-      {p:'x',t:'Cross-border e-commerce India',h:'💬 28k impressions'}
-    ]
-  };
-  const PTAG_NAME={douyin:'抖音',bili:'B站',weibo:'微博',ig:'IG',x:'X'};
-  let trendOrder=[];  // 用于手动 ⟳ 重排
-  function buildTrendOrder(p){
-    const items=(TRENDING[p||'all']||TRENDING.all).slice();
-    return items.map((it,i)=>({...it,_k:i+'_'+Math.random()}));
-  }
-  function renderTrends(p){
-    const box=document.getElementById('trendList');
-    const items=trendOrder.length && trendOrder._p===p ? trendOrder.slice() : buildTrendOrder(p);
-    if(!trendOrder._p) trendOrder._p=p;
-    trendOrder=items; trendOrder._p=p;
-    box.innerHTML=items.map(it=>'<div class="trend-item"><div class="trow"><span class="ptag '+it.p+'">'+PTAG_NAME[it.p]+'</span><div class="title">'+esc(it.t)+'</div></div><div class="meta"><span class="heat">'+esc(it.h)+'</span></div></div>').join('');
-  }
-  function refreshTrends(){
-    const p=trendOrder._p||'all';
-    trendOrder=buildTrendOrder(p);
-    renderTrends(p);
-  }
-  document.querySelectorAll('#trendTabs button').forEach(b=>b.addEventListener('click',function(){
-    document.querySelectorAll('#trendTabs button').forEach(x=>x.classList.remove('on'));
-    this.classList.add('on');
-    trendOrder=[];  // 重建
-    renderTrends(this.dataset.p);
-  }));
-  renderTrends('all');
+/* ============ 渲染：知识库 ============ */
+function renderKB(){
+  const wrap=document.getElementById('kbList');
+  if(!DB.kb.length){wrap.innerHTML='<div class="empty">'+t('暂无知识。语音或文字录入，AI 自动提炼三条。','Empty. Voice/text in, AI extracts 3 parts.','खाली।')+'</div>';return;}
+  wrap.innerHTML=DB.kb.map(k=>'<div class="kbitem"><div class="kt">'+esc(k.title)+' <span class="kw">'+(k.keyword?esc(k.keyword):t('未设关键词','no kw','कोई नहीं'))+'</span></div>'+
+    '<div class="row"><b>'+t('问题关键词','Keyword','कीवर्ड')+'</b>'+(k.keyword||'—')+'</div>'+
+    '<div class="row"><b>'+t('处理步骤','Steps','स्टेप्स')+'</b>'+esc(k.steps||'—')+'</div>'+
+    '<div class="row"><b>'+t('落地方法','Usage','उपयोग')+'</b>'+esc(k.usage||'—')+'</div>'+
+    (k.synonyms&&k.synonyms.length?'<div class="syn">'+t('同义检索标签：','Synonyms:','समानार्थी:')+k.synonyms.map(s=>'<span>'+esc(s)+'</span>').join('')+'</div>':'')+
+    '<div class="kacts"><button onclick="aiExtract(\''+k.id+'\')">'+t('AI 重新提炼','Re-extract','फिर निकालें')+'</button><button onclick="delKB(\''+k.id+'\')">'+t('删除','Del','हटाएं')+'</button></div></div>').join('');
+}
+function openKbModal(){
+  modalHTML(t('新增知识','Add knowledge','ज्ञान जोड़ें'),
+    '<div class="hint" style="margin-bottom:10px">'+t('输入经验/踩坑/培训/视频干货，点「AI 提炼」自动生成三条 + 同义标签；也可手动填写。','Paste experience/training/video; AI extracts 3 parts + tags. Or fill manually.','अनुभव/ट्रेनिंग डालें; AI 3 भाग बनाएगा।')+'</div>'+
+    '<div class="field"><label>'+t('原始内容（自由输入）','Raw content','मूल')+'</label><textarea id="kbRaw"></textarea></div>'+
+    '<button class="btn" style="width:100%;margin-bottom:8px" onclick="kbAiFill()">'+t('✨ AI 提炼三条','✨ AI extract','✨ AI निकाले')+'</button>'+
+    '<div class="field"><label>'+t('问题关键词','Keyword','कीवर्ड')+'</label><input id="kbKw"></div>'+
+    '<div class="field"><label>'+t('处理步骤','Steps','स्टेप्स')+'</label><textarea id="kbSteps"></textarea></div>'+
+    '<div class="field"><label>'+t('落地方法','Usage','उपयोग')+'</label><textarea id="kbUsage"></textarea></div>'+
+    '<button class="btn accent" style="width:100%" onclick="saveKB()">'+t('保存','Save','सहेजें')+'</button>');
+}
+function kbAiFill(){
+  const raw=document.getElementById('kbRaw').value.trim(); if(!raw){toast(t('先输入内容','Input first','पहले लिखें'));return;}
+  const ex=extractKB(raw);
+  document.getElementById('kbKw').value=ex.keyword;
+  document.getElementById('kbSteps').value=ex.steps;
+  document.getElementById('kbUsage').value=ex.usage;
+  toast(t('已提炼','Extracted','निकाला'));
+}
+function extractKB(raw){
+  // 启发式：第一行/第一句=关键词；按换行或数字编号拆步骤；末句=落地方法
+  const lines=raw.split(/[\n。.!?！？]/).map(s=>s.trim()).filter(Boolean);
+  let keyword=lines[0]||raw.slice(0,20);
+  if(keyword.length>24) keyword=keyword.slice(0,24);
+  let steps=lines.slice(1).join('；');
+  if(!steps) steps=raw;
+  let usage=lines[lines.length-1]||'按上述步骤执行';
+  return {keyword:keyword,steps:steps,usage:usage};
+}
+function saveKB(){
+  const raw=document.getElementById('kbRaw').value.trim();
+  let kw=document.getElementById('kbKw').value.trim();
+  let steps=document.getElementById('kbSteps').value.trim();
+  let usage=document.getElementById('kbUsage').value.trim();
+  if(!kw&&!steps&&!usage&&!raw){toast(t('内容为空','Empty','खाली'));return;}
+  if(!kw||!steps||!usage){ const ex=extractKB(raw||(kw+' '+steps+' '+usage)); kw=kw||ex.keyword; steps=steps||ex.steps; usage=usage||ex.usage; }
+  const synonyms=genSynonyms(kw, steps);
+  DB.kb.unshift({id:uid(),title:kw||raw.slice(0,20),keyword:kw,steps:steps,usage:usage,synonyms:synonyms,created:now()});
+  saveDB(); closeModal(); renderKB(); renderOverview(); toast(t('已存入知识库','Saved to KB','KB में सहेजा'));
+}
+function aiExtract(id){ const k=DB.kb.find(x=>x.id===id); if(!k)return; const ex=extractKB((k.keyword||'')+'。'+(k.steps||'')+'。'+(k.usage||'')); k.keyword=ex.keyword; k.steps=ex.steps; k.usage=ex.usage; k.synonyms=genSynonyms(ex.keyword,ex.steps); saveDB(); renderKB(); toast(t('已重新提炼','Re-extracted','फिर निकाला')); }
+function delKB(id){ DB.kb=DB.kb.filter(k=>k.id!==id); saveDB(); renderKB(); renderOverview(); }
+
+/* ============ 同义词库（跨语种） ============ */
+const SYN_GROUPS=[
+  ['汇美元单据核对','汇款','转汇','汇美金','付美金','境外付款','美元','美金','美金单据','USD','usd','dollar','dollars','wire','remit','remittance','payment abroad','विदेशी भुगतान','डॉलर'],
+  ['付款','支付','付钱','pay','payment','भुगतान','pay'],
+  ['收款','到账','收到款','receive','received','राशि प्राप्त','पैसा आया'],
+  ['订单','单子','下order','order','ऑर्डर','खरीद'],
+  ['样品','样','寄样','sample','सैंपल','नमूना'],
+  ['报价','报件','价格','quote','quotation','भाव','दाम'],
+  ['物流','发货','快递','运输','shipping','logistics','शिपिंग','भेजना'],
+  ['报关','清关','海关','customs','clearance','कस्टम'],
+  ['尾款','余款','结清','balance','बाकी','बकाया'],
+  ['定金','预付','订金','deposit','अग्रिम','एडवांस'],
+  ['银饰','银','silver','चांदी'],
+  ['手机壳','壳','case','फोन केस'],
+  ['印度','india','भारत','इंडिया'],
+  ['中国','china','चीन','चीन'],
+  ['客户','客人','买家','client','customer','ग्राहक'],
+  ['库存','存货','inventory','स्टॉक','माल'],
+  ['复盘','总结','review','समीक्षा','रिव्यू'],
+  ['热点','爆款','热门','trending','viral','ट्रेंड','हिट'],
+  ['读书','阅读','read','पढ़ें','पढ़ाई'],
+  ['运动','锻炼','exercise','व्यायाम','कसरत'],
+  ['播客','podcast','पॉडकास्ट']
+];
+const TOKEN_GROUP={};
+SYN_GROUPS.forEach((g,gi)=>g.forEach(tok=>TOKEN_GROUP[tok.toLowerCase()]=gi));
+function genSynonyms(kw, steps){
+  const out=new Set();
+  const text=((kw||'')+' '+(steps||'')).toLowerCase();
+  Object.keys(TOKEN_GROUP).forEach(tok=>{ if(text.includes(tok)) SYN_GROUPS[TOKEN_GROUP[tok]].forEach(s=>out.add(s)); });
+  // 关键词本身
+  if(kw) out.add(kw);
+  // 简单分词补充
+  const segs=(kw||'').split(/[\s,，、/]/).filter(s=>s.length>=2);
+  segs.forEach(s=>out.add(s));
+  return Array.from(out).slice(0,16);
+}
+
+/* ============ 渲染：记账 ============ */
+function renderFinance(){
+  const income=DB.finance.filter(f=>f.type==='in').reduce((s,f)=>s+(+f.amount||0),0);
+  const expense=DB.finance.filter(f=>f.type==='out').reduce((s,f)=>s+(+f.amount||0),0);
+  document.getElementById('financeStats').innerHTML=[
+    {ico:'💵',l:t('收入','Income','आय'),v:'¥'+fmt(income)},
+    {ico:'💸',l:t('支出','Expense','खर्च'),v:'¥'+fmt(expense)},
+    {ico:'📈',l:t('利润','Profit','मुनाफा'),v:'¥'+fmt(income-expense)}
+  ].map(c=>'<div class="card"><div class="bigico">'+c.ico+'</div><div class="lbl">'+c.l+'</div><div class="val">'+c.v+'</div></div>').join('');
+  const list=document.getElementById('financeList');
+  const items=DB.finance.slice().sort((a,b)=>b.created.localeCompare(a.created));
+  if(!items.length){list.innerHTML='<div class="empty">'+t('暂无记账。语音口述收支自动归档。','No records.','कोई रिकॉर्ड नहीं।')+'</div>';return;}
+  list.innerHTML=items.map(f=>'<div class="fitem '+(f.type==='in'?'in':'out')+'"><div class="fi">'+(f.type==='in'?'💰':'💳')+'</div><div class="fb"><div class="ft">'+esc(f.note||(f.type==='in'?t('收入','Income','आय'):t('支出','Expense','खर्च')))+'</div><div class="fm">'+(f.cat?esc(f.cat)+' · ':'')+esc(f.created)+(f.orderId?' · #'+esc(f.orderId.slice(-4)):'')+'</div></div><div class="fa">'+(f.type==='in'?'+':'-')+'¥'+fmt(f.amount)+'</div></div>').join('');
+}
+function openFinanceModal(){
+  modalHTML(t('记账','Finance','पैसा'),
+    '<div class="field"><label>'+t('类型','Type','प्रकार')+'</label><select id="fnType"><option value="in">'+t('收入','Income','आय')+'</option><option value="out">'+t('支出','Expense','खर्च')+'</option></select></div>'+
+    '<div class="field"><label>'+t('金额','Amount','राशि')+'</label><input id="fnAmt" type="number"></div>'+
+    '<div class="field"><label>'+t('分类','Category','श्रेणी')+'</label><input id="fnCat" placeholder="'+t('如 货款/运费/样品费','e.g. goods/ship/sample','जैसे माल/भाड़ा')+'"></div>'+
+    '<div class="field"><label>'+t('备注','Note','नोट')+'</label><input id="fnNote"></div>'+
+    '<button class="btn accent" style="width:100%" onclick="saveFinance()">'+t('保存','Save','सहेजें')+'</button>');
+}
+function saveFinance(){
+  const type=document.getElementById('fnType').value;
+  const amount=parseFloat(document.getElementById('fnAmt').value);
+  if(!amount){toast(t('请填金额','Amount?','राशि?'));return;}
+  DB.finance.unshift({id:uid(),type:type,amount:amount,cat:document.getElementById('fnCat').value.trim(),note:document.getElementById('fnNote').value.trim(),orderId:'',created:now()});
+  saveDB(); closeModal(); renderFinance(); renderOverview(); toast(t('已记账','Saved','सहेजा'));
+}
+
+/* ============ 渲染：复盘 ============ */
+function renderReview(){
+  const income=DB.finance.filter(f=>f.type==='in').reduce((s,f)=>s+(+f.amount||0),0);
+  const expense=DB.finance.filter(f=>f.type==='out').reduce((s,f)=>s+(+f.amount||0),0);
+  const orders=DB.clients.reduce((s,c)=>s+(c.orders?c.orders.length:0),0);
+  const doneOrders=DB.clients.reduce((s,c)=>s+(c.orders?c.orders.filter(o=>o.payStatus==='done').length:0),0);
+  document.getElementById('reviewCards').innerHTML=[
+    {ico:'📦',l:t('库存复盘','Inventory','स्टॉक'),v:'—',m:t('每周一自动生成：进度/问题/优化','Auto Mon: progress/issues/fixes','सोम: प्रगति/समस्या')},
+    {ico:'🤝',l:t('客户成交复盘','Deal review','डील'),v:doneOrders+'/'+orders,t:t('已结清 / 总订单','paid / total','चुका / कुल')},
+    {ico:'📱',l:t('自媒体数据复盘','Social','सोशल'),v:'—',m:t('抖音/B站/IG/X 数据','Douyin/Bili/IG/X','डॉयन/आईजी')},
+    {ico:'🎯',l:t('月度/年度目标','Goals','लक्ष्य'),v:'23%',m:t('净利润同比 ▲','net profit ▲','शुद्ध ▲')}
+  ].map(c=>'<div class="card"><div class="bigico">'+c.ico+'</div><div class="lbl">'+c.l+'</div><div class="val">'+c.v+'</div><div class="meta">'+c.m+'</div></div>').join('');
+  // 客户成交
+  const wrap=document.getElementById('reviewClients');
+  if(!DB.clients.length){wrap.innerHTML='<div class="empty">'+t('暂无客户成交记录','No deals','कोई डील नहीं')+'</div>';}
+  else wrap.innerHTML=DB.clients.map(c=>'<div class="client"><div class="ch"><div class="ava">👤</div><div><div class="cn">'+esc(c.name)+'</div><div class="cm">'+(c.orders?c.orders.length:0)+' '+t('笔订单','orders','ऑर्डर')+'</div></div></div>'+(c.orders||[]).map(o=>'<div class="order"><div class="oh"><span>'+t('订单','Order','ऑर्डर')+' '+esc(o.id.slice(-4))+'</span>'+(o.goods?'<span class="pill">'+esc(o.goods)+'</span>':'')+(o.total?'<span class="pill ok">¥'+esc(o.total)+'</span>':'')+'</div></div>').join('')+'</div>').join('');
+  document.getElementById('reviewSocial').innerHTML=t('自媒体数据复盘：抖音/小红书/微博（国内）+ YouTube/IG（印度）每日热点采集已于「自动」板块归档，二创思路自动生成。接 API 后此处展示播放/转化数据。','Social review: trending archived in Auto board. With API, show play/conversion here.','सोशल: ट्रेंड ऑटो बोर्ड में।');
+}
+
+/* ============ 到期弹窗 ============ */
+function checkDue(){
+  const due=DB.reminders.filter(r=>!r.done && r.time && /明天|今天|周五|周一|周三|月底|\d+月\d+日|\d+:\d+/.test(r.time));
+  if(!due.length){ toast(t('暂无到期待办','None due','कोई देय नहीं')); return; }
+  modalHTML(t('到期提醒','Due reminders','देय रिमाइंडर'),
+    due.map(r=>'<div class="due-card"><div class="dt">'+esc(r.text)+'</div><div class="dm">'+(r.time?esc(r.time):'')+' · '+(r.source||'')+'</div></div>').join(''));
+}
+
+/* ============ 全局搜索 ============ */
+function buildIndex(){
+  const items=[];
+  DB.kb.forEach(k=>items.push({type:'kb',panel:'kb',title:k.title||k.keyword||t('知识','KB','ज्ञान'),body:((k.keyword||'')+' '+(k.steps||'')+' '+(k.usage||'')),syn:k.synonyms||[],ref:()=>goTo('kb')}));
+  DB.clients.forEach(c=>{
+    items.push({type:'client',panel:'projects',title:c.name,body:(c.note||'')+(c.orders?c.orders.map(o=>(o.goods||'')+' '+(o.total||'')).join(' '):''),syn:[],ref:()=>goTo('projects')});
+    (c.orders||[]).forEach(o=>items.push({type:'order',panel:'projects',title:(c.name)+' '+(o.goods||''),body:[o.clientName,o.date,o.goods,o.qty,o.unitPrice,o.total,o.delivery,o.deposit,o.balance,o.balanceDue,o.logistics,o.customs,o.remark].join(' '),syn:[],ref:()=>goTo('projects')}));
+  });
+  DB.finance.forEach(f=>items.push({type:'finance',panel:'finance',title:(f.note||f.cat||(f.type==='in'?t('收入','Income','आय'):t('支出','Expense','खर्च'))),body:(f.cat||'')+' '+(f.note||''),syn:[],ref:()=>goTo('finance')}));
+  DB.reminders.forEach(r=>items.push({type:'reminder',panel:'reminders',title:r.text,body:r.text,syn:[],ref:()=>goTo('reminders')}));
+  DB.notes.forEach(n=>items.push({type:'note',panel:n.cat==='inbox'?'overview':n.cat,title:n.text.slice(0,40),body:n.text,syn:[],ref:()=>goTo(n.cat==='inbox'?'overview':n.cat)}));
+  // 趋势
+  Object.keys(TRENDING).forEach(p=>TRENDING[p].forEach(tt=>items.push({type:'trend',panel:'auto',title:tt,body:tt,syn:[],ref:()=>goTo('auto')})));
+  // 优先级
+  const pri={kb:1,'order':2,client:2,review:3,reminder:4,finance:4,note:4,trend:4};
+  items.forEach(it=>it.pri=pri[it.type]||4);
+  return items;
+}
+function tokenize(q){
+  q=q.toLowerCase().trim(); const toks=[];
+  // 拉丁词
+  (q.match(/[a-z0-9$￥]+/gi)||[]).forEach(w=>toks.push(w));
+  // 中文按 2-gram + 整串
+  const cjk=q.replace(/[a-z0-9$￥\s]/gi,'');
+  if(cjk){ toks.push(cjk); for(let i=0;i<cjk.length-1;i++) toks.push(cjk.slice(i,i+2)); }
+  return toks.filter(Boolean);
+}
+function matchTerms(q){
+  const toks=tokenize(q); const terms=new Set();
+  toks.forEach(tk=>{
+    if(TOKEN_GROUP[tk]!==undefined){ SYN_GROUPS[TOKEN_GROUP[tk]].forEach(s=>terms.add(s.toLowerCase())); }
+    else terms.add(tk);
+  });
+  return Array.from(terms);
+}
+function runSearch(){
+  const q=document.getElementById('searchInput').value.trim();
+  const box=document.getElementById('sres');
+  document.getElementById('searchWrap').classList.toggle('has-q',!!q);
+  if(!q){ box.classList.remove('show'); return; }
+  const terms=matchTerms(q);
+  const items=buildIndex();
+  const hits=[];
+  items.forEach(it=>{
+    const hay=((it.title||'')+' '+(it.body||'')+' '+(it.syn||[]).join(' ')).toLowerCase();
+    let score=0; const matched=[];
+    terms.forEach(term=>{ if(hay.includes(term)){ score++; if(matched.indexOf(term)<0) matched.push(term); } });
+    if(score>0) hits.push({it,score,matched});
+  });
+  hits.sort((a,b)=> (a.it.pri-b.it.pri) || (b.score-a.score));
+  if(!hits.length){ box.innerHTML='<div class="sempty">'+t('未找到匹配。试试同义词或口语化描述。','No match. Try synonyms.','कोई मेल नहीं।')+'</div>'; box.classList.add('show'); return; }
+  const groups={1:t('知识库方案','KB','ज्ञान'),2:t('客户订单','Orders','ऑर्डर'),3:t('复盘','Review','समीक्षा'),4:t('其他','Others','अन्य')};
+  let html='',lastPri=null;
+  hits.slice(0,40).forEach(h=>{
+    if(h.it.pri!==lastPri){ html+='<div class="grp">'+groups[h.it.pri]+'</div>'; lastPri=h.it.pri; }
+    html+='<div class="sitem" onclick="jumpTo(\''+h.it.panel+'\')">'+
+      '<div class="st"><span class="sp">'+esc(panelName(h.it.panel))+'</span>'+highlight(h.it.title,h.matched)+'</div>'+
+      (h.it.body?'<div class="sb">'+highlight(h.it.body.slice(0,90),h.matched)+'</div>':'')+
+      '<div class="sx">'+h.matched.map(m=>esc(m)).slice(0,6).join(' · ')+'</div></div>';
+  });
+  box.innerHTML=html; box.classList.add('show');
+}
+function onSearch(){ runSearch(); }
+function jumpTo(p){ document.getElementById('sres').classList.remove('show'); goTo(p); }
+function clearSearch(){ document.getElementById('searchInput').value=''; document.getElementById('searchWrap').classList.remove('has-q'); document.getElementById('sres').classList.remove('show'); }
+function panelName(p){ return {kb:t('知识库','KB','ज्ञान'),projects:t('项目','Projects','प्रोजेक्ट'),finance:t('记账','Money','पैसा'),reminders:t('提醒','Reminders','रिमाइंडर'),auto:t('自动','Auto','ऑटो'),overview:t('首页','Home','होम'),review:t('复盘','Review','समीक्षा')}[p]||p; }
+function highlight(text,terms){
+  let s=esc(text);
+  (terms||[]).forEach(tm=>{ if(!tm)return; try{ const re=new RegExp('('+tm.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'); s=s.replace(re,'<mark>$1</mark>'); }catch(_){} });
+  return s;
+}
+document.addEventListener('click',function(e){ if(!e.target.closest('#searchWrap')&&!e.target.closest('#sres')) document.getElementById('sres').classList.remove('show'); });
+
+/* ============ 弹窗 ============ */
+function modalHTML(title,body){ document.getElementById('modalTitle').innerHTML=title; document.getElementById('modalBody').innerHTML=body; document.getElementById('modal').classList.add('show'); }
+function closeModal(){ document.getElementById('modal').classList.remove('show'); }
+
+/* ============ 统一渲染 ============ */
+function renderAll(){ renderOverview(); renderReminders(); renderAuto(); renderProjects(); renderKB(); renderFinance(); renderReview(); renderVoiceBox('inbox'); }
+
+/* ============ 初始化 ============ */
+(function init(){
+  setLang('zh');
+  renderAll(); renderTrends();
+  document.querySelectorAll('.dict-lang button').forEach(b=>b.classList.toggle('on',b.getAttribute('data-l')===selectedLang));
+})();
 </script>
 </body>
 </html>
